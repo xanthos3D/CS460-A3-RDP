@@ -114,7 +114,8 @@ public:
 
     //if a token has more complex information then store it in the token string
     std::string getTokenString();
-
+    int getLineNum() { return _lineNumber; }
+    int getCharPos() { return _charPos; }
     //useful tester function so we can print the tokens and there type.
     std::string print();
 

@@ -13,6 +13,9 @@ public:
     CST() : root(nullptr) {}
     //function to set the root node to a new cstnode
     void setRoot(CSTNode* node) { root = node; }
+    void addChild(Token token);
+    void addSibling(Token token);
+    void printTree();   //Breadth First Traversal
 
 private:
     //object made of one cst node which connects to the other nodes apart of this data structure

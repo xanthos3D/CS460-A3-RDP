@@ -10,24 +10,12 @@ public:
     CSTNode(const Token& token) : token(token), leftChild(nullptr), rightSibling(nullptr) {}
     CSTNode* getLeft() { return leftChild;}
     CSTNode* getRight() { return rightSibling;}
+    void leftChild( CSTNode *newLeftChild ) { leftChild = newLeft; }
+    void rightSibling(CSTNode *newRightSibling) { rightSibling = newRight; }
     Token getToken() { return token; }
 private:
     Token token;
-    CSTNode* leftChild;
-    CSTNode* rightSibling;
-
-void addChild(CSTNode* child) {
-    if (!leftChild) {
-        leftChild = child;  // If no children, set the first child
-    } else {
-        // Otherwise, find the rightmost sibling and add the child there
-        CSTNode* sibling = leftChild;
-        while (sibling->rightSibling) {
-            sibling = sibling->rightSibling;
-        }
-        sibling->rightSibling = child;  // Add as a right sibling
-    }
-}
+    CSTNode *leftChild, *rightSibling;
 };
 
 
