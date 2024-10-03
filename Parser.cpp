@@ -38,19 +38,20 @@ Checks program meets BNF requirements
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::program() {
+ state Parser::program() {
     if ( tokenVector[index].getTokenString() == "procedure" && tokenVector[index++].getTokenString() == "main") {
         main_procedure();
     } else if (tokenVector[index].getTokenString()== "function") {
         function_declaration();
     } else if (tokenVector[index].getTokenString() == "procedure") {
         procedure_declaration();
-    } else if (peek() == datatype_specifer()) {
+    } else if (datatype_specifer()) {
         declaration_statement();
     } else{
         //something wrong
         throw;
     }
+     return state;
 }
 
 
@@ -62,15 +63,13 @@ Checks main-procedure meets BNF requirements
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::main_procedure() {
-    // Parse the main procedure based on your grammar rules
+void Parser::main_procedure()
     expect("procedure");
     expect("main");
     expect("(");
     expect("void");
     expect(")");
     block_statement();
-
 }
 
 
@@ -82,23 +81,23 @@ Checks function_declaration meets BNF requirements
 @post:
  *****************************************************************************************/
 void Parser::function_declaration(){
-
     expect("function");
-    datatype_specifer();
-    identifier();
+
+    if ( datatype_specifer() )
+        expect( tokenVector[state].getTokenString() )
+
+    expect( datatype_specifer() );
+    expect( identifier() );
     expect( "(");
 
-    if (peek() == "void") {
+    if (tokenVector[state] == "void") {
         expect("void");
     } else {
         parameter_list();
     }
-
-    expect ( ')')
+    expect( ')')
     expect( '{' );
     compound_statement();
-    expect( '}' );
-
 }
 
 
@@ -110,9 +109,81 @@ Checks procedure_declaration meets BNF requirements
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::procedure_declaration();
+void Parser::procedure_declaration(){
+     expect( "procedure");
+    if ( tokenVector[state].isIdentifier() ) {
+        expect(tokenVector[state].getTokenString());
+    }
+    expect( '(' );
+    if (tokenVector[state] == "void") {
+        expect("void");
+    } else {
+        parameter_list();
+    }
+    expect( ')' );
+    expect( '{' );
+    compound_statement();
+    expect( '}' );
+}
 
 
+
+void Parser::parameter_list(){
+    if( !tokenVector[state].isRParen()) {
+        datatype_specifer();
+        identifier();
+        expect( ",");
+        parameter_list();
+    }
+}
+
+
+//DONE
+void Parser::block_statement(){
+    expect( "{");
+    if( !tokenVector[state].isRParen()) {
+        compound_statement();
+    }
+    expect( "}")
+}
+
+//DONE
+void Parser::compound_statement() {
+    if ( !tokenVector[state].isRBrace() ) {
+        statement();
+        compound_statement();
+    }
+}
+
+
+void Parser::statement(){
+    Token token = tokenVector[state];
+    if (token.getTokenString() == "return"){
+        return_statement();
+    } else if ( token.getTokenString() == "if "){
+        selection_statement();
+    }else if (token.getTokenString() == "printf"){
+        printf_statement();
+    }else if (token.getTokenString() == "for"){
+        iteration_statement();
+    } else if ( datatype_specifer() || token.isIdentifier() ) {
+        expect( token.getTokenString() );
+    }
+
+}
+
+
+
+void Parser::return_statement(){
+        expect("return")
+        if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
+            expect(tokenVector[state]);
+        }
+        else {
+            expression();
+        }
+        expect (';');
+}
 
 
 /** **************************************************************************************
@@ -120,73 +191,265 @@ Checks declaration_statement meets BNF requirements
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::declaration_statement();
-void Parser::parameter_list();
-
-void Parser::block_statement(){
-    expect("{")
-    compound_statement();
-    expect("{")
+void Parser::declaration_statement(){
+    if ( datatype_specifier() ){
+        expect( tokenVector[state].getTokenString() )
+    }
+    if (tokenVector[state].isIdentifier()) {
+        expect(tokenVector[state] );
+    } else {
+        identifier_and_identifier_array_list()
+    }
+    expect (';');
 }
 
-void Parser::compound_statement() {
-    if (statement()) {
+void Parser::user_defined_function(){
+    if (tokenVector[state].isIdentifier()) {
+        expect( tokenVector[state].getTokenString() );
+    }
+    expect("(");
+    if (tokenVector[state].isIdentifier()) {
+        identifier_and_identifier_array_list()
+    } else{
+        expression();
+    }
+    expect(")");
 
-    } else if (compound_statement()) {
+}
+
+
+
+void Parser::getchar_function(){
+    expect("getchar");
+    expect("(");
+    if (tokenVector[state].isIdentifier()) {
+        expect( tokenVector[state].getTokenString() );
+    }
+    expect(")");
+
+}
+
+void Parser::printf_statement(){
+
+    expect("getchar");
+    expect("(");
+    if ( tokenVector[state].isDoubleQuote() || tokenVector[state].isDoubleQuote() ){
+        expect( tokenVector[state].getTokenString() );
+        if ( tokenVector[state].isComma() ){
+            identifier_and_identifier_array_list();
+        }
+    }
+    expect(")");
+    expect(";");
+
+}
+
+void Parser::assignment_statement(){
+
+    if (tokenVector[state].isIdentifier()) {
+        expect( tokenVector[state].getTokenString() );
+    }
+    if ( tokenVector[state].isAssignmentOperator() ){
+        expect( tokenVector[state].getTokenString() );
+    }
+    if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
+        expect(tokenVector[state]);
+    }
+    else {
+        expression();
+    }
+}
+void Parser::iteration_statement() {
+
+    if ( tokenVector[index].getTokenString() == "for") {
+        expect(tokenVector[state].getTokenString());
+        expect("(");
+        initialization_statement();
+        if (tokenVector[state].isSemicolon()) {
+            expect(tokenVector[state].getTokenString());
+        }
+        boolean_expression();
+        if (tokenVector[state].isSemicolon()) {
+            expect(tokenVector[state].getTokenString());
+        }
+        expression();
+        expect(")");
+        if (tokenVector[state].isLBrace()) {
+            block_statement();
+        } else {
+            statement();
+        }
+    } else if ( tokenVector[index++].getTokenString() == "while" ){
+        expect(tokenVector[state].getTokenString());
+        expect("(");
+        boolean_expression();
+        expect(")");
+        if (tokenVector[state].isLBrace()) {
+            block_statement();
+        } else {
+            statement();
+        }
+    }
+}
+void Parser::selection_statement(){
+    if ( token.getTokenString() == "if "){
+        expect(tokenVector[state].getTokenString());
+    }
+    expect("(");
+    boolean_expression();
+    expect(")");
+    if (tokenVector[state].isLBrace()) {
+        block_statement();
+        if ( token.getTokenString() == "else "){
+            expect(tokenVector[state].getTokenString());
+            if (tokenVector[state].isLBrace()) {
+                block_statement();
+            } else {
+                statement();
+            }
+        }
+    } else {
         statement();
-    }else{
-        throw
+        if ( token.getTokenString() == "else "){
+            expect(tokenVector[state].getTokenString());
+            if (tokenVector[state].isLBrace()) {
+                block_statement();
+            } else {
+                statement();
+            }
+        }
+    }
+
+}
+
+
+void Parser::expression(){
+    <BOOLEAN_EXPRESSION> |
+
+    <NUMERICAL_EXPRESSION>
+}
+void Parser::initialization_statement(){
+
+    if (tokenVector[state].isIdentifier()) {
+        expect( tokenVector[state].getTokenString() );
+    }
+    if ( tokenVector[state].isAssignmentOperator() ){
+        expect( tokenVector[state].getTokenString() );
+    }
+    if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
+        expect(tokenVector[state]);
+    }
+}
+void Parser::boolean_expression(){
+    if (tokenVector[state] == "TRUE"){
+        expect( "TRUE");
+    }else if (tokenVector[state] == "FALSE"){
+        expect( "FALSE");
+    } else if ( tokenVector[state].isLParen() ){
+        expect("(");
+        if (tokenVector[state].isIdentifier()) {
+            expect( tokenVector[state].getTokenString() );
+            boolean_operator();
+            boolean_expression();
+        }
+        expect(")");
+    } else {
+        numerical_expression();
+        if (  tokenVector[state].isBoolE() || tokenVector[state].isBoolNE() ||
+                tokenVector[state].isBoolLT() || tokenVector[state].isBoolGT() ||
+                tokenVector[state].isBoolLTE() || tokenVector[state].isBoolGTE()){
+            expect( tokenVector[state].getTokenString() );
+        }
+        numerical_expression();
     }
 }
 
 
-void Parser::statement();
-void Parser::return_statement();
-void Parser::declaration_statement();
-void Parser::user_defined_function();
-void Parser::getchar_function();
-void Parser::printf_statement();
-void Parser::assignment_statement();
-void Parser::iteration_statement();
-void Parser::selection_statement();
-void Parser::expression();
-void Parser::initialization_statement();
-void Parser::boolean_expression();
-void Parser::numerical_expression();
+
+
+
+void Parser::numerical_expression(){
+    if ( tokenVector[state].isLParen() ) {
+        expect("(");
+        numerical_operand();
+
+    } else {
+        numerical_operand();
+        if (tokenVector[state].isRParen()) {
+        }
+        numerical_operator()){
+        expect( tokenVector[state].getTokenString() );
+}
+        }
+    }
+
+    <L_PAREN>
+    <NUMERICAL_OPERAND> <R_PAREN> |
+
+
+    <L_PAREN>
+    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
+    <R_PAREN>
+
+     <L_PAREN>
+    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
+    <R_PAREN>
+
+    <NUMERICAL_OPERAND> |
+
+
+    <NUMERICAL_OPERAND>
+    <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
+
+    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <L_PAREN>
+    <NUMERICAL_EXPRESSION> <R_PAREN> <NUMERICAL_OPERAND>
+    <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
+
+    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <L_PAREN>
+    <NUMERICAL_EXPRESSION> <R_PAREN>
+}
 void Parser::relational_expression();
 void Parser::equality_expression();
-void Parser::boolean_operator();
+
+void Parser::boolean_operator(){
+    if ( tokenVector[state] == "==" || tokenVector[state] == "&&"){
+        expect( tokenVector[state] )
+    }
+}
 void Parser::numerical_operator();
-void Parser::numerical_operand();
+void Parser::numerical_operand(){
+    <IDENTIFIER> |
 
-std::string Parser::datatype_specifer(){
+    <INTEGER> |
 
-    Token token = peek();
-    if (token.getTokenString() == "int") {
-        expect("int");
-        return "int";
-    }
+    <GETCHAR_FUNCTION> |
 
-    if (token.getTokenString() == "char") {
-        expect("char");
-        return "char";
-    }
+    <USER_DEFINED_FUNCTION> |
 
-    if (token.getTokenString() == "bool") {
-        expect(" bool");
-        return "bool";
-    }
-    throw;
+    <SINGLE_QUOTE> <CHARACTER> <SINGLE_QUOTE> |
 
+    <SINGLE_QUOTE> <ESCAPED_CHARACTER> <SINGLE_QUOTE> |
+
+    <DOUBLE_QUOTE>
+    <CHARACTER> <DOUBLE_QUOTE> |
+
+    <DOUBLE_QUOTE> <ESCAPED_CHARACTER>
+    <DOUBLE_QUOTE>
 }
 
+bool Parser::datatype_specifier(){
+    if (token.getTokenString() == "int" || token.getTokenString() == "char" || token.getTokenString() == "bool")
+        return true;
+}
 void Parser::identifier_and_identifier_array_list();
 void Parser::identifier_array_list();
-void Parser::identifier_list();
-void Parser::identifier(){
+void Parser::identifier_list()
 
-    expect( currentToken );
-    identifier_tail();
+std::string Parser::identifier(){
+    if (!tokenVector[state].isIdentifier()){
+        throw std::runtime_error("Expected an identifier, but got '" + token.value + "'");
+    }
+    return tokenVector[state].getTokenString();
 }
 void Parser::identifier_tail();
 
@@ -194,48 +457,29 @@ void Parser::identifier_tail();
 
 
 /** **************************************************************************************
-Takes current token and creates a CSTNode from it, then moves onto next token in vector
+If the token
 @pre:
 @post:
  *****************************************************************************************/
-Token Parser::consume() {
-    if (current < tokens.size()) {
-        if ( currentToken.getLineNum() != tokenVector[index].getLineNum() ){
-            cst->addChild( Token );
-        } else {
-            cst->addSibling();
+Parser::expect(const std::string& expected_value) {
+    if (state < tokenVector.size()) {
+        Token token = tokenVector[state];
+        if (token.getTokenString() != expected_value) {
+            throw std::runtime_error("Expected '" + expected_value + "' but got '" + token.value + "'");
         }
-        return tokens[current++];
+
+        if ( token.getTokenString() == '{'   ){
+            cst->addChild( token );
+        } else if ( token.getTokenString() == ';' ){
+            cst->addSibling( token );
+            newStatement = true;
+        }else if (newStatement){
+            cst->addChild( token );
+            newStatement = false;
+        } else {
+            cst->addSibling( token ) ;
+        }
     }
     throw std::runtime_error("Unexpected end of input");
 }
 
-
-
-
-
-/** **************************************************************************************
-compares ecxpected value with token type and make sure it follows BNF requirements
-@pre:
-@post:
- *****************************************************************************************/
-void Parser::expect(const std::string& expected_value) {
-    Token token = consume();
-    if (token.value != expected_value) {
-        throw std::runtime_error("Expected '" + expected_value + "' but got '" + token.value + "'");
-    }
-}
-
-
-
-
-
-/** **************************************************************************************
-Checks nect Token without consuming it
-@pre:
-@post:
- *****************************************************************************************/
-
-Token Parser::peek(){
-    return tokens[current];
-}

@@ -102,11 +102,9 @@ Token Tokenizer::getToken() {
         //this eats up all non esential input we dont care about, such as spaces not inside a string token.
         while (inputStream.get(c) && !charOfInterest(c)) {
             charPosition++;
-
             if(c == '\n'){
                 lineNumber++;
             }
-
         }
 
         if (inputStream.eof()) {
@@ -123,11 +121,7 @@ Token Tokenizer::getToken() {
             }
 
             inputStream.putback(c);
-
-            //set token and return it
-            token.setIdentifier(tempText);
-
-
+            token.setIdentifier(tempText);            //set token and return it
             return token;
 
         }if (isdigit(c)){
@@ -151,31 +145,24 @@ Token Tokenizer::getToken() {
 
         }else if(c == '('){
             token.setLParen();
-
             return token;
         }else if(c == ')'){
             token.setRParen();
-
             return token;
         }else if(c == '{'){
             token.setLBrace();
-
             return token;
         }else if(c == '}'){
             token.setRBrace();
-
             return token;
         }else if(c == '['){
             token.setLBracket();
-
             return token;
         }else if(c == ']'){
             token.setRBracket();
-
             return token;
         }else if(c == ';'){
             token.setSemicolon();
-
             return token;
         }else if(c == '='){
             //need a special case where if there is a equal after this then 

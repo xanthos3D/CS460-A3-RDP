@@ -25,10 +25,8 @@ public:
     //default constructor, on declaration we need a vector of tokens, then we definie the token as blank, and create a new cst object.
     Parser(std::vector<Token>& incommingVector) : tokenVector(incommingVector),currentToken(1,1),cst(new CST()){};
 
-    Token consume();
-    void expect(const std::string& expected_value);
+    expect(const std::string& expected_value);
     void peek();
-
     void program();
     void main_procedure();
     void function_declaration();
@@ -54,7 +52,7 @@ public:
     void boolean_operator();
     void numerical_operator();
     void numerical_operand();
-    std::string datatype_specifer();
+    bool datatype_specifier();
     void identifier_and_identifier_array_list();
     void identifier_array_list();
     void identifier_list();
@@ -65,15 +63,11 @@ public:
     CST* parse();
 private:
 
-    //current token.
-    Token currentToken;
-
     //possition in our vector which is passed in, and current state
-    int index = 0, state = 0;
-
+    int state = 0;
+    bool newStatement;
     //vector passed in on declaration
     std::vector<Token> tokenVector;
-
     //concrete syntax tree object 
     CST* cst;
 };
