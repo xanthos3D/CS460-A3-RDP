@@ -47,8 +47,7 @@ public:
     void initialization_statement();
     void boolean_expression();
     void numerical_expression();
-    void relational_expression();
-    void equality_expression();
+    bool relational_expression();
     void boolean_operator();
     void numerical_operator();
     void numerical_operand();

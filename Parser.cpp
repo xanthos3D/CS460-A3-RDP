@@ -144,7 +144,7 @@ void Parser::block_statement(){
     if( !tokenVector[state].isRParen()) {
         compound_statement();
     }
-    expect( "}")
+    expect( "}");
 }
 
 //DONE
@@ -193,12 +193,12 @@ Checks declaration_statement meets BNF requirements
  *****************************************************************************************/
 void Parser::declaration_statement(){
     if ( datatype_specifier() ){
-        expect( tokenVector[state].getTokenString() )
+        expect( tokenVector[state].getTokenString() );
     }
     if (tokenVector[state].isIdentifier()) {
         expect(tokenVector[state].getTokenString());
     } else {
-        identifier_and_identifier_array_list()
+        identifier_and_identifier_array_list();
     }
     expect (';');
 }
@@ -209,7 +209,7 @@ void Parser::user_defined_function(){
     }
     expect("(");
     if (tokenVector[state].isIdentifier()) {
-        identifier_and_identifier_array_list()
+        identifier_and_identifier_array_list();
     } else{
         expression();
     }
@@ -253,7 +253,7 @@ void Parser::assignment_statement(){
         expect( tokenVector[state].getTokenString() );
     }
     if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
-        expect(tokenVector[state]);
+        expect(tokenVector[state].getTokenString());
     }
     else {
         expression();
@@ -279,7 +279,7 @@ void Parser::iteration_statement() {
         } else {
             statement();
         }
-    } else if ( tokenVector[index++].getTokenString() == "while" ){
+    } else if ( tokenVector[state].getTokenString() == "while" ){
         expect(tokenVector[state].getTokenString());
         expect("(");
         boolean_expression();
@@ -292,7 +292,7 @@ void Parser::iteration_statement() {
     }
 }
 void Parser::selection_statement(){
-    if ( token.getTokenString() == "if "){
+    if ( tokenVector[state].getTokenString() == "if "){
         expect(tokenVector[state].getTokenString());
     }
     expect("(");
@@ -300,7 +300,7 @@ void Parser::selection_statement(){
     expect(")");
     if (tokenVector[state].isLBrace()) {
         block_statement();
-        if ( token.getTokenString() == "else "){
+        if ( tokenVector[state].getTokenString() == "else "){
             expect(tokenVector[state].getTokenString());
             if (tokenVector[state].isLBrace()) {
                 block_statement();
@@ -310,7 +310,7 @@ void Parser::selection_statement(){
         }
     } else {
         statement();
-        if ( token.getTokenString() == "else "){
+        if ( tokenVector[state].getTokenString() == "else "){
             expect(tokenVector[state].getTokenString());
             if (tokenVector[state].isLBrace()) {
                 block_statement();
@@ -322,12 +322,29 @@ void Parser::selection_statement(){
 
 }
 
-
+// leave for last
 void Parser::expression(){
-    <BOOLEAN_EXPRESSION> |
-
-    <NUMERICAL_EXPRESSION>
+    if ( tokenVector[state].isBoolTrue() || tokenVector[state].isBoolFalse() ) {
+        boolean_expression();
+    } else if (tokenVector[state].is) {
+        numerical_expression();
+    } else if ( tokenVector[state].isIdentifier() && ( tokenVector[state+1].isRParen() || tokenVector[state+1].isSemicolon() ) {
+        expect(tokenVector[state].getTokenString());
+        return;
+    }else if (tokenVector[state].isIdentifier()) {
+            if (tokenVector[state+1].isBoolAnd() || tokenVector[state+1].isBoolOr() || relational_expression() )) {
+                boolean_expression();
+            }
+            numerical_expression();
+        }
+        if (tokenVector[state].isLParen()) {
+            expect("(");
+            expression();
+            expect(")");
+        }
+        throw std::runtime_error("Unexpected token in expression.");
 }
+
 void Parser::initialization_statement(){
 
     if (tokenVector[state].isIdentifier()) {
@@ -337,13 +354,13 @@ void Parser::initialization_statement(){
         expect( tokenVector[state].getTokenString() );
     }
     if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
-        expect(tokenVector[state]);
+        expect(tokenVector[state].getTokenString());
     }
 }
 void Parser::boolean_expression(){
-    if (tokenVector[state] == "TRUE"){
+    if (tokenVector[state].isBoolTrue()){
         expect( "TRUE");
-    }else if (tokenVector[state] == "FALSE"){
+    }else if (tokenVector[state].isBoolFalse()){
         expect( "FALSE");
     } else if ( tokenVector[state].isLParen() ){
         expect("(");
@@ -355,9 +372,7 @@ void Parser::boolean_expression(){
         expect(")");
     } else {
         numerical_expression();
-        if (  tokenVector[state].isBoolE() || tokenVector[state].isBoolNE() ||
-                tokenVector[state].isBoolLT() || tokenVector[state].isBoolGT() ||
-                tokenVector[state].isBoolLTE() || tokenVector[state].isBoolGTE()){
+        if (  relational_expression() ){
             expect( tokenVector[state].getTokenString() );
         }
         numerical_expression();
@@ -368,20 +383,22 @@ void Parser::boolean_expression(){
 
 
 
-void Parser::numerical_expression(){
-    if ( tokenVector[state].isLParen() ) {
+void Parser::numerical_expression() {
+    if (tokenVector[state].isLParen()) {
         expect("(");
         numerical_operand();
 
     } else {
         numerical_operand();
         if (tokenVector[state].isRParen()) {
-        }
-        numerical_operator()){
-        expect( tokenVector[state].getTokenString() );
-}
+            numerical_operator();
+            {
+                expect(tokenVector[state].getTokenString());
+
+            }
         }
     }
+}
 
     <L_PAREN>
     <NUMERICAL_OPERAND> <R_PAREN> |
@@ -408,51 +425,85 @@ void Parser::numerical_expression(){
     <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <L_PAREN>
     <NUMERICAL_EXPRESSION> <R_PAREN>
 }
-void Parser::relational_expression();
-void Parser::equality_expression();
+bool Parser::relational_expression(){
+    return tokenVector[state].isBoolE() || tokenVector[state].isBoolNE() ||
+       tokenVector[state].isBoolLT() || tokenVector[state].isBoolGT() ||
+       tokenVector[state].isBoolLTE() || tokenVector[state].isBoolGTE();
+}
 
 void Parser::boolean_operator(){
-    if ( tokenVector[state] == "==" || tokenVector[state] == "&&"){
-        expect( tokenVector[state] )
+    if ( tokenVector[state].isBoolE() || tokenVector[state].isBoolAnd()){
+        expect( tokenVector[state].getTokenString() );
     }
 }
-void Parser::numerical_operator();
+void Parser::numerical_operator(){
+    if (tokenVector[state].isPlus()){
+        expect("+");
+    }else if (tokenVector[state].isMinus()){
+        expect("-");
+    }else if (tokenVector[state].isAsterisk()){
+        expect("*");
+    }else if (tokenVector[state].isDivide()){
+        expect("/");
+    }else if (tokenVector[state].isModulo()){
+        expect("%");
+    }else if (tokenVector[state].isCarot()){
+        expect("^");
+    }else{
+        //ERROR ERROR ERROR ERROR ERROR ERROR ERROR
+    }
+}
 void Parser::numerical_operand(){
-    <IDENTIFIER> |
-
-    <INTEGER> |
-
-    <GETCHAR_FUNCTION> |
-
-    <USER_DEFINED_FUNCTION> |
-
-    <SINGLE_QUOTE> <CHARACTER> <SINGLE_QUOTE> |
-
-    <SINGLE_QUOTE> <ESCAPED_CHARACTER> <SINGLE_QUOTE> |
-
-    <DOUBLE_QUOTE>
-    <CHARACTER> <DOUBLE_QUOTE> |
-
-    <DOUBLE_QUOTE> <ESCAPED_CHARACTER>
-    <DOUBLE_QUOTE>
+    if (tokenVector[state].isIdentifier()) {
+        if (tokenVector[state + 1].isLParen()) {
+            user_defined_function();
+        } else {
+            expect( tokenVector[state].getTokenString() );
+        }
+    } else if (tokenVector[state].isInt()){
+        expect( tokenVector[state].getTokenString() );
+    }else if (tokenVector[state].getTokenString() == "getchar"){
+        getchar_function();
+    }else if (tokenVector[state].isSingleQuote()){
+        expect("'");
+        if(tokenVector[state].isChar()){
+            expect( tokenVector[state].getTokenString() );
+        }else if (tokenVector[state].isEscChar()){
+            expect( tokenVector[state].getTokenString() );
+        }else{
+            //ERROR ERROR ERROR ERROR ERROR ERROR
+        }
+        expect("'");
+    }else if (tokenVector[state].isDoubleQuote()){
+        expect("\"");
+        if(tokenVector[state].isChar()){
+            expect( tokenVector[state].getTokenString() );
+        }else if (tokenVector[state].isEscChar()){
+            expect( tokenVector[state].getTokenString() );
+        }else{
+            //ERROR ERROR ERROR ERROR ERROR ERROR
+        }
+        expect("\"");
+    } else {
+        //ERROR ERROR ERROR ERROR ERROR ERROR ERROR
+    }
 }
 
 bool Parser::datatype_specifier(){
-    if (tokenVector[state].getTokenString() == "int" || tokenVector[state].getTokenString() == "char" ||
-                                                        tokenVector[state].getTokenString() == "bool")
-        return true;
+    return (tokenVector[state].getTokenString() == "int" || tokenVector[state].getTokenString() == "char" ||
+                                                        tokenVector[state].getTokenString() == "bool");
 }
 
 void Parser::identifier_and_identifier_array_list();
 void Parser::identifier_array_list();
-void Parser::identifier_list()
+void Parser::identifier_list();
 
 void Parser::identifier(){
     if (!tokenVector[state].isIdentifier()){
         throw std::runtime_error("Expected an identifier, but got '" + tokenVector[state].getTokenString() + "'");
     }
-    return tokenVector[state].getTokenString();
 }
+
 void Parser::identifier_tail();
 
 
@@ -481,6 +532,7 @@ void Parser::expect(const std::string& expected_value) {
         } else {
             cst->addSibling( token ) ;
         }
+        state++;
     }
     throw std::runtime_error("Unexpected end of input");
 }

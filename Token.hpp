@@ -36,6 +36,7 @@ public:
     bool &isInt();
     bool &isDouble();
     bool &isChar();
+    bool &isEscChar();
     bool &isString();
 
     bool &isBoolE();
@@ -77,6 +78,7 @@ public:
     void setInt(std::string);
     void setDouble(std::string);
     void setChar(std::string);
+    bool setEscChar(std::string);
     void setString(std::string);
 
     void setBoolE();
@@ -109,9 +111,10 @@ private:
     //opperators
     _assignmentOperator, _modulo, _plus, _minus, _asterisk, _divide, _caret,
     //data types
-    _int,_double, _char, _string,
+    _int,_double, _char, _string, _escChar,
     //boolean opperators
      _boolE,_boolNE, _boolGT, _boolLT, _boolGTE, _boolLTE, _boolAnd, _boolOr, _boolNot, _boolTrue,  _boolFalse;
+
 
     std::string _tokenString;
     int _lineNumber, _charPos;

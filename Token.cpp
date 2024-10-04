@@ -19,7 +19,7 @@ Token::Token(int line, int pos)
           _assignmentOperator(false), _modulo(false),
           _plus(false), _minus(false), _asterisk(false), _divide(false), _caret(false),
           //Data Types
-          _int(false), _double(false), _char(false), _string(false),
+          _int(false), _double(false), _char(false), _string(false), _escChar(false),
           //Boolean Ops
           _boolE(false), _boolNE(false), _boolGT(false), _boolLT(false),
           _boolGTE(false), _boolLTE(false), _boolAnd(false), _boolOr(false),
@@ -53,6 +53,8 @@ bool& Token::isCarot(){return _caret;}
 bool& Token::isInt(){return _int;}
 bool& Token::isDouble(){return _double;}
 bool& Token::isChar(){return _char;}
+bool& Token::isEscChar() {return _escChar;}
+
 bool& Token::isString(){return _string;}
 
 bool& Token::isBoolE(){return _boolE;}
@@ -107,6 +109,13 @@ void Token::setChar(std::string input){
      _char = true;
      _tokenString = input;
 }
+
+void Token::setEscChar(std::string input){
+    _escChar = true;
+    _tokenString = input;
+
+}
+
 void Token::setString(std::string input){
      _string = true;
      _tokenString = input;
@@ -313,6 +322,14 @@ std::string Token::print() {
             std::cout<<"Token:      "<<_tokenString<<std::endl;
 
             output+= "CHAR\n";
+            output+= "Token:      ";
+            output+= _tokenString;
+            output+= "\n";
+        }else if(isEscChar()){
+            std::cout<< "ESC CHAR" <<std::endl;
+            std::cout<<"Token:      "<<_tokenString<<std::endl;
+
+            output+= "ESC CHAR\n";
             output+= "Token:      ";
             output+= _tokenString;
             output+= "\n";
