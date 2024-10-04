@@ -23,10 +23,10 @@
 class Parser {
 public:
     //default constructor, on declaration we need a vector of tokens, then we definie the token as blank, and create a new cst object.
-    Parser(std::vector<Token>& incommingVector) : tokenVector(incommingVector),currentToken(1,1),cst(new CST()){};
+    Parser(std::vector<Token>& incommingVector) : tokenVector(incommingVector) ,cst(new CST()){};
 
-    expect(const std::string& expected_value);
-    void peek();
+    void expect(const char& expected_value);
+    void expect(const std::string& expected_value);
     void program();
     void main_procedure();
     void function_declaration();

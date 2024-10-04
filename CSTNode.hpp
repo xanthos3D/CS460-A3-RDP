@@ -7,15 +7,15 @@
 
 class CSTNode {
 public:
-    CSTNode(const Token& token) : token(token), leftChild(nullptr), rightSibling(nullptr) {}
-    CSTNode* getLeft() { return leftChild;}
-    CSTNode* getRight() { return rightSibling;}
-    void leftChild( CSTNode *newLeftChild ) { leftChild = newLeft; }
-    void rightSibling(CSTNode *newRightSibling) { rightSibling = newRight; }
+    CSTNode(const Token& token) : token(token), _leftChild(nullptr), _rightSibling(nullptr) {}
+    CSTNode* getLeft() { return _leftChild;}
+    CSTNode* getRight() { return _rightSibling;}
+    void leftChild( CSTNode *newLeftChild ) { _leftChild = newLeftChild; }
+    void rightSibling(CSTNode *newRightSibling) { _rightSibling = newRightSibling; }
     Token getToken() { return token; }
 private:
     Token token;
-    CSTNode *leftChild, *rightSibling;
+    CSTNode *_leftChild, *_rightSibling;
 };
 
 

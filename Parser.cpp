@@ -13,8 +13,6 @@ parse function which creates our CST
 CST* Parser::parse() {
 
     //set our class token to the first token in our token vector
-    currentToken = tokenVector[vectorPosition];
-
     //do we want desicion making here? what if the token doesnt form a proper statewment?
 
     //note it seems we want to go down a node for every time \n is found. luck for uss when 
@@ -38,20 +36,19 @@ Checks program meets BNF requirements
 @pre:
 @post:
  *****************************************************************************************/
- state Parser::program() {
-    if ( tokenVector[index].getTokenString() == "procedure" && tokenVector[index++].getTokenString() == "main") {
+ void Parser::program() {
+    if ( tokenVector[state].getTokenString() == "procedure" && tokenVector[state++].getTokenString() == "main") {
         main_procedure();
-    } else if (tokenVector[index].getTokenString()== "function") {
+    } else if (tokenVector[state].getTokenString()== "function") {
         function_declaration();
-    } else if (tokenVector[index].getTokenString() == "procedure") {
+    } else if (tokenVector[state].getTokenString() == "procedure") {
         procedure_declaration();
-    } else if (datatype_specifer()) {
+    } else if ( datatype_specifier() ) {
         declaration_statement();
     } else{
         //something wrong
         throw;
     }
-     return state;
 }
 
 
@@ -63,7 +60,7 @@ Checks main-procedure meets BNF requirements
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::main_procedure()
+void Parser::main_procedure(){
     expect("procedure");
     expect("main");
     expect("(");
@@ -83,19 +80,20 @@ Checks function_declaration meets BNF requirements
 void Parser::function_declaration(){
     expect("function");
 
-    if ( datatype_specifer() )
-        expect( tokenVector[state].getTokenString() )
-
-    expect( datatype_specifer() );
-    expect( identifier() );
+    if ( datatype_specifier() ) {
+        expect(tokenVector[state].getTokenString());
+    }
+    if (tokenVector[state].isIdentifier() ) {
+        expect(tokenVector[state].getTokenString());
+    }
     expect( "(");
 
-    if (tokenVector[state] == "void") {
+    if (tokenVector[state].getTokenString() == "void") {
         expect("void");
     } else {
         parameter_list();
     }
-    expect( ')')
+    expect( ')');
     expect( '{' );
     compound_statement();
 }
@@ -115,7 +113,7 @@ void Parser::procedure_declaration(){
         expect(tokenVector[state].getTokenString());
     }
     expect( '(' );
-    if (tokenVector[state] == "void") {
+    if (tokenVector[state].getTokenString() == "void") {
         expect("void");
     } else {
         parameter_list();
@@ -130,7 +128,9 @@ void Parser::procedure_declaration(){
 
 void Parser::parameter_list(){
     if( !tokenVector[state].isRParen()) {
-        datatype_specifer();
+        if ( datatype_specifier() ){
+            expect(tokenVector[state].getTokenString() );
+        }
         identifier();
         expect( ",");
         parameter_list();
@@ -166,7 +166,7 @@ void Parser::statement(){
         printf_statement();
     }else if (token.getTokenString() == "for"){
         iteration_statement();
-    } else if ( datatype_specifer() || token.isIdentifier() ) {
+    } else if ( datatype_specifier() || token.isIdentifier() ) {
         expect( token.getTokenString() );
     }
 
@@ -175,9 +175,9 @@ void Parser::statement(){
 
 
 void Parser::return_statement(){
-        expect("return")
+        expect("return");
         if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
-            expect(tokenVector[state]);
+            expect(tokenVector[state].getTokenString());
         }
         else {
             expression();
@@ -196,7 +196,7 @@ void Parser::declaration_statement(){
         expect( tokenVector[state].getTokenString() )
     }
     if (tokenVector[state].isIdentifier()) {
-        expect(tokenVector[state] );
+        expect(tokenVector[state].getTokenString());
     } else {
         identifier_and_identifier_array_list()
     }
@@ -261,7 +261,7 @@ void Parser::assignment_statement(){
 }
 void Parser::iteration_statement() {
 
-    if ( tokenVector[index].getTokenString() == "for") {
+    if ( tokenVector[state].getTokenString() == "for") {
         expect(tokenVector[state].getTokenString());
         expect("(");
         initialization_statement();
@@ -438,16 +438,18 @@ void Parser::numerical_operand(){
 }
 
 bool Parser::datatype_specifier(){
-    if (token.getTokenString() == "int" || token.getTokenString() == "char" || token.getTokenString() == "bool")
+    if (tokenVector[state].getTokenString() == "int" || tokenVector[state].getTokenString() == "char" ||
+                                                        tokenVector[state].getTokenString() == "bool")
         return true;
 }
+
 void Parser::identifier_and_identifier_array_list();
 void Parser::identifier_array_list();
 void Parser::identifier_list()
 
-std::string Parser::identifier(){
+void Parser::identifier(){
     if (!tokenVector[state].isIdentifier()){
-        throw std::runtime_error("Expected an identifier, but got '" + token.value + "'");
+        throw std::runtime_error("Expected an identifier, but got '" + tokenVector[state].getTokenString() + "'");
     }
     return tokenVector[state].getTokenString();
 }
@@ -461,16 +463,16 @@ If the token
 @pre:
 @post:
  *****************************************************************************************/
-Parser::expect(const std::string& expected_value) {
+void Parser::expect(const std::string& expected_value) {
     if (state < tokenVector.size()) {
         Token token = tokenVector[state];
         if (token.getTokenString() != expected_value) {
-            throw std::runtime_error("Expected '" + expected_value + "' but got '" + token.value + "'");
+            throw std::runtime_error("Expected '" + expected_value + "' but got '" + tokenVector[state].getTokenString() + "'");
         }
 
-        if ( token.getTokenString() == '{'   ){
+        if ( tokenVector[state].isRBrace()   ){
             cst->addChild( token );
-        } else if ( token.getTokenString() == ';' ){
+        } else if ( tokenVector[state].isSemicolon() ){
             cst->addSibling( token );
             newStatement = true;
         }else if (newStatement){
