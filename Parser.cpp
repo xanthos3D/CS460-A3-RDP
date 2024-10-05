@@ -424,8 +424,10 @@ void Parser::numerical_expression() {
 
     <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <L_PAREN>
     <NUMERICAL_EXPRESSION> <R_PAREN>
-}
-bool Parser::relational_expression(){
+
+
+
+    bool Parser::relational_expression(){
     return tokenVector[state].isBoolE() || tokenVector[state].isBoolNE() ||
        tokenVector[state].isBoolLT() || tokenVector[state].isBoolGT() ||
        tokenVector[state].isBoolLTE() || tokenVector[state].isBoolGTE();
@@ -494,9 +496,40 @@ bool Parser::datatype_specifier(){
                                                         tokenVector[state].getTokenString() == "bool");
 }
 
-void Parser::identifier_and_identifier_array_list();
-void Parser::identifier_array_list();
-void Parser::identifier_list();
+void Parser::identifier_and_identifier_array_list() {
+    if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isLBracket()) {
+        identifier_array_list();
+    } else if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isComma()) {
+        identifier_list();
+    } else {
+        throw;
+    }
+}
+
+
+
+
+
+void Parser::identifier_list() {
+    expect( tokenVector[state].getTokenString() );
+    expect( tokenVector[state].getTokenString() );
+    if ( tokenVector[state].isIdentifier() && tokenVector[state + 1].isComma() ) {
+        identifier_list();
+    }
+}
+
+void Parser::identifier_array_list() {
+    expect( tokenVector[state].getTokenString() );
+    expect( "[" );
+    if (tokenVector[state].isInt()) {
+        expect(tokenVector[state].getTokenString());
+    }
+    expect( "]" );
+    if ( tokenVector[state].isComma() ) {
+        identifier_array_list();
+    }
+}
+
 
 void Parser::identifier(){
     if (!tokenVector[state].isIdentifier()){
@@ -504,7 +537,6 @@ void Parser::identifier(){
     }
 }
 
-void Parser::identifier_tail();
 
 
 
