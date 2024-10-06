@@ -1,43 +1,65 @@
+#include "Token.hpp"
 #include "CST.hpp"
 #include "CSTNode.hpp"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "Token.hpp"
 
 
+/** **************************************************************************************
+recursively adds a child/
+@pre:
+@post:
+ *****************************************************************************************/
 void CST::addChild(CSTNode *root, Token token) {
-
     if ( root == nullptr )
         return;
 
     if (root->getLeft() == nullptr && root->getRight() == nullptr) {
         CSTNode* newNode = new CSTNode(token);
         root->leftChild(newNode);
+        root->getLeft()->setChild(true);
     }else if (root->getLeft() != nullptr) {
-        addChild(root->getLeft(), token);
+        addChild(root->getLeft(), token) ;
     }else if (root->getRight() != nullptr) {
         addChild(root->getRight(), token);
     }
     return;
 }
 
+
+
+
+
+/** **************************************************************************************
+recursively adds a sibling.
+@pre:
+@post:
+ *****************************************************************************************/
 void CST::addSibling(CSTNode *root, Token token) {
 
     if ( root == nullptr )
         return;
 
     if ( root->getRight() == nullptr && root->getLeft() == nullptr ){
-        CSTNode* newNode = new CSTNode( Token );
+        CSTNode* newNode = new CSTNode( token );
         root->rightSibling( newNode );
     }else if ( root->getRight() != nullptr ){
-        addSibling( root->getRight() );
+        addSibling( root->getRight(), token );
     } else if ( root->getLeft() != nullptr ){
-        addSibling( root->getLeft() );
+        addSibling( root->getLeft(), token );
     }
     return;
 }
 
+
+
+
+/** **************************************************************************************
+Prints the TREE using BFS
+@pre:
+@post:
+ *****************************************************************************************/
 void CST::printTree(){
     if ( root == nullptr ) {
         return;
@@ -48,14 +70,19 @@ void CST::printTree(){
     while ( !q.empty() ) {
 
         CSTNode* current = q.front();
-        std::cout << current->getToken().getTokenString() << std::endl;
+        //checks if its a child, if yess then it drops to a new line
+        if ( current->isChild() ){
+            std::cout << "\n" + current->getToken().getTokenString();
+        } else {
+            std::cout << current->getToken().getTokenString();
+        }
         q.pop();
 
-        if ( current->leftChild() != nullptr ){
-            q.push( current->leftSubtree() );
+        if ( current->getLeft()!= nullptr ){
+            q.push( current->getLeft() );
         }
-        if ( current->rightSibling() != nullptr ){
-            q.push( current->rightSubtree() );
+        if ( current->getRight() != nullptr ){
+            q.push( current->getRight() );
         }
     }
 }

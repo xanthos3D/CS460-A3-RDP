@@ -19,8 +19,6 @@ CST* Parser::parse() {
     //we tokenize we keep track of the line number, so we can use that to tell when we should
     // go down a node
 
-    //make the root node of the program in our cst
-    cst->setRoot(new CSTNode(currentToken));
 
     //loop through the vector of tokens until EOF token
     program();
@@ -72,6 +70,8 @@ void Parser::main_procedure(){
 
 
 
+
+
 /** **************************************************************************************
 Checks function_declaration meets BNF requirements
 @pre:
@@ -93,9 +93,10 @@ void Parser::function_declaration(){
     } else {
         parameter_list();
     }
-    expect( ')');
-    expect( '{' );
+    expect( ")");
+    expect( "{" );
     compound_statement();
+    expect( "}" );
 }
 
 
@@ -112,34 +113,48 @@ void Parser::procedure_declaration(){
     if ( tokenVector[state].isIdentifier() ) {
         expect(tokenVector[state].getTokenString());
     }
-    expect( '(' );
+    expect( "(" );
     if (tokenVector[state].getTokenString() == "void") {
         expect("void");
     } else {
         parameter_list();
     }
-    expect( ')' );
-    expect( '{' );
+    expect( ")" );
+    expect( "{" );
     compound_statement();
-    expect( '}' );
+    expect( "}" );
 }
 
 
 
+
+
+/** **************************************************************************************
+checks that the parameter lsit  follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::parameter_list(){
-    if( !tokenVector[state].isRParen()) {
         if ( datatype_specifier() ){
             expect(tokenVector[state].getTokenString() );
         }
         identifier();
-        expect( ",");
-        parameter_list();
-    }
+        if ( tokenVector[state].isComma() ) {
+            expect(",");
+            parameter_list();
+        }
 }
 
 
-//DONE
-void Parser::block_statement(){
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a block statement that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
+ void Parser::block_statement(){
     expect( "{");
     if( !tokenVector[state].isRParen()) {
         compound_statement();
@@ -147,7 +162,15 @@ void Parser::block_statement(){
     expect( "}");
 }
 
-//DONE
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a compound statementthat follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::compound_statement() {
     if ( !tokenVector[state].isRBrace() ) {
         statement();
@@ -156,6 +179,14 @@ void Parser::compound_statement() {
 }
 
 
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement makes sure its a statemtn defined in BNF
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::statement(){
     Token token = tokenVector[state];
     if (token.getTokenString() == "return"){
@@ -166,14 +197,22 @@ void Parser::statement(){
         printf_statement();
     }else if (token.getTokenString() == "for"){
         iteration_statement();
+    } else if (token.isIdentifier() && tokenVector[state+1].isAssignmentOperator() ){
+        assignment_statement();
     } else if ( datatype_specifier() || token.isIdentifier() ) {
-        expect( token.getTokenString() );
+        declaration_statement();
     }
-
 }
 
 
 
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a return statement that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::return_statement(){
         expect("return");
         if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
@@ -182,8 +221,12 @@ void Parser::return_statement(){
         else {
             expression();
         }
-        expect (';');
+    expect(";");
 }
+
+
+
+
 
 
 /** **************************************************************************************
@@ -194,15 +237,28 @@ Checks declaration_statement meets BNF requirements
 void Parser::declaration_statement(){
     if ( datatype_specifier() ){
         expect( tokenVector[state].getTokenString() );
+        if (tokenVector[state].isIdentifier()) {
+            expect(tokenVector[state].getTokenString());
+        } else {
+            throw;
+        }
     }
-    if (tokenVector[state].isIdentifier()) {
-        expect(tokenVector[state].getTokenString());
-    } else {
+    if ( tokenVector[state].isComma()){
+        expect(",");
         identifier_and_identifier_array_list();
     }
-    expect (';');
+    expect(";");
 }
 
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing function is a user_defined_function  that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::user_defined_function(){
     if (tokenVector[state].isIdentifier()) {
         expect( tokenVector[state].getTokenString() );
@@ -219,6 +275,13 @@ void Parser::user_defined_function(){
 
 
 
+
+
+/** **************************************************************************************
+checks that the follwoing function is a getchar function that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::getchar_function(){
     expect("getchar");
     expect("(");
@@ -229,6 +292,15 @@ void Parser::getchar_function(){
 
 }
 
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a printf statement that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::printf_statement(){
 
     expect("getchar");
@@ -244,21 +316,38 @@ void Parser::printf_statement(){
 
 }
 
-void Parser::assignment_statement(){
 
-    if (tokenVector[state].isIdentifier()) {
-        expect( tokenVector[state].getTokenString() );
-    }
-    if ( tokenVector[state].isAssignmentOperator() ){
-        expect( tokenVector[state].getTokenString() );
-    }
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a assignment statement that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
+void Parser::assignment_statement(){
+    expect( tokenVector[state].getTokenString() );
+    expect( tokenVector[state].getTokenString() );
+
     if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
         expect(tokenVector[state].getTokenString());
     }
     else {
         expression();
     }
+    expect(";");
 }
+
+
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is an iteration statement that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::iteration_statement() {
 
     if ( tokenVector[state].getTokenString() == "for") {
@@ -291,6 +380,16 @@ void Parser::iteration_statement() {
         }
     }
 }
+
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a selection statement that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::selection_statement(){
     if ( tokenVector[state].getTokenString() == "if "){
         expect(tokenVector[state].getTokenString());
@@ -322,41 +421,71 @@ void Parser::selection_statement(){
 
 }
 
-// leave for last
-void Parser::expression(){
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a initialization expression that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
+ void Parser::expression(){
     if ( tokenVector[state].isBoolTrue() || tokenVector[state].isBoolFalse() ) {
         boolean_expression();
-    } else if (tokenVector[state].is) {
+    } else if (tokenVector[state].isInt()) {
         numerical_expression();
-    } else if ( tokenVector[state].isIdentifier() && ( tokenVector[state+1].isRParen() || tokenVector[state+1].isSemicolon() ) {
-        expect(tokenVector[state].getTokenString());
+    } else if ( tokenVector[state].isIdentifier() && ( ( tokenVector[state+1].isRParen() || tokenVector[state+1].isSemicolon() ) )) {
+        expect( tokenVector[state].getTokenString() );
         return;
     }else if (tokenVector[state].isIdentifier()) {
-            if (tokenVector[state+1].isBoolAnd() || tokenVector[state+1].isBoolOr() || relational_expression() )) {
+            if ( boolean_operator() || relational_expression() ) {
                 boolean_expression();
             }
             numerical_expression();
-        }
-        if (tokenVector[state].isLParen()) {
+            }
+        if ( tokenVector[state].isLParen() ) {
             expect("(");
             expression();
             expect(")");
         }
-        throw std::runtime_error("Unexpected token in expression.");
-}
+ }
 
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing statement is a initialization expression that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::initialization_statement(){
 
-    if (tokenVector[state].isIdentifier()) {
+    if (tokenVector[state].isIdentifier()  && ( tokenVector[state+1].isAssignmentOperator() ) ) {
         expect( tokenVector[state].getTokenString() );
-    }
-    if ( tokenVector[state].isAssignmentOperator() ){
         expect( tokenVector[state].getTokenString() );
-    }
-    if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
-        expect(tokenVector[state].getTokenString());
+        if  (tokenVector[state].isSingleQuote() ){
+            // single_quote_string();
+        } else if ( tokenVector[state].isDoubleQuote() ){
+            // double_quote_string();
+        } else {
+            expression();
+        }
     }
 }
+
+
+
+
+
+
+
+/** **************************************************************************************
+checks that the follwoing expression is a boolean expression that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::boolean_expression(){
     if (tokenVector[state].isBoolTrue()){
         expect( "TRUE");
@@ -381,8 +510,11 @@ void Parser::boolean_expression(){
 
 
 
-
-
+/** **************************************************************************************
+checks that the follwoing expression is a numerical expression that follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::numerical_expression() {
     if (tokenVector[state].isLParen()) {
         expect("(");
@@ -400,44 +532,43 @@ void Parser::numerical_expression() {
     }
 }
 
-    <L_PAREN>
-    <NUMERICAL_OPERAND> <R_PAREN> |
-
-
-    <L_PAREN>
-    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
-    <R_PAREN>
-
-     <L_PAREN>
-    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
-    <R_PAREN>
-
-    <NUMERICAL_OPERAND> |
-
-
-    <NUMERICAL_OPERAND>
-    <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
-
-    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <L_PAREN>
-    <NUMERICAL_EXPRESSION> <R_PAREN> <NUMERICAL_OPERAND>
-    <NUMERICAL_OPERATOR> <NUMERICAL_EXPRESSION>
-
-    <NUMERICAL_OPERAND> <NUMERICAL_OPERATOR> <L_PAREN>
-    <NUMERICAL_EXPRESSION> <R_PAREN>
 
 
 
-    bool Parser::relational_expression(){
+
+/** **************************************************************************************
+checks if token is a relational_expression
+@pre:
+@post:
+ *****************************************************************************************/
+bool Parser::relational_expression(){
     return tokenVector[state].isBoolE() || tokenVector[state].isBoolNE() ||
        tokenVector[state].isBoolLT() || tokenVector[state].isBoolGT() ||
        tokenVector[state].isBoolLTE() || tokenVector[state].isBoolGTE();
 }
 
-void Parser::boolean_operator(){
-    if ( tokenVector[state].isBoolE() || tokenVector[state].isBoolAnd()){
-        expect( tokenVector[state].getTokenString() );
-    }
+
+
+
+
+/** **************************************************************************************
+checks if token is a boolean operator
+@pre:
+@post:
+ *****************************************************************************************/
+bool Parser::boolean_operator(){
+    return (tokenVector[state].isBoolOr() || tokenVector[state].isBoolAnd());
 }
+
+
+
+
+
+/** **************************************************************************************
+checks  if token is a numerical_operator
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::numerical_operator(){
     if (tokenVector[state].isPlus()){
         expect("+");
@@ -455,6 +586,16 @@ void Parser::numerical_operator(){
         //ERROR ERROR ERROR ERROR ERROR ERROR ERROR
     }
 }
+
+
+
+
+
+/** **************************************************************************************
+checks if numerical_operand follows BNF
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::numerical_operand(){
     if (tokenVector[state].isIdentifier()) {
         if (tokenVector[state + 1].isLParen()) {
@@ -491,18 +632,40 @@ void Parser::numerical_operand(){
     }
 }
 
+
+
+
+
+
+/** **************************************************************************************
+returns if token is a datatype specifier
+@pre:
+@post:
+ *****************************************************************************************/
 bool Parser::datatype_specifier(){
     return (tokenVector[state].getTokenString() == "int" || tokenVector[state].getTokenString() == "char" ||
                                                         tokenVector[state].getTokenString() == "bool");
 }
 
+
+
+
+
+/** **************************************************************************************
+checks if token is followed by identifier list or array lsit
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::identifier_and_identifier_array_list() {
     if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isLBracket()) {
         identifier_array_list();
     } else if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isComma()) {
         identifier_list();
+    } else if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isSemicolon()){
+        identifier();
+        return;
     } else {
-        throw;
+        throw std::runtime_error("Expected an identifier, but got '" + tokenVector[state].getTokenString() + "'");
     }
 }
 
@@ -510,6 +673,11 @@ void Parser::identifier_and_identifier_array_list() {
 
 
 
+/** **************************************************************************************
+checks identifier  list follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::identifier_list() {
     expect( tokenVector[state].getTokenString() );
     expect( tokenVector[state].getTokenString() );
@@ -518,6 +686,15 @@ void Parser::identifier_list() {
     }
 }
 
+
+
+
+
+/** **************************************************************************************
+checks identifier array list follows BNF rules
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::identifier_array_list() {
     expect( tokenVector[state].getTokenString() );
     expect( "[" );
@@ -531,41 +708,59 @@ void Parser::identifier_array_list() {
 }
 
 
+
+
+
+/** **************************************************************************************
+checks if token is identifier
+@pre:
+@post:
+ *****************************************************************************************/
 void Parser::identifier(){
     if (!tokenVector[state].isIdentifier()){
         throw std::runtime_error("Expected an identifier, but got '" + tokenVector[state].getTokenString() + "'");
     }
+    expect( tokenVector[state].getTokenString() );
 }
+
 
 
 
 
 
 /** **************************************************************************************
-If the token
+If the token string matches expected_value then it adds it to the CST tree
 @pre:
 @post:
  *****************************************************************************************/
 void Parser::expect(const std::string& expected_value) {
     if (state < tokenVector.size()) {
         Token token = tokenVector[state];
+ //       std::cout << tokenVector[state].getTokenString() << std::endl;          //Use this to debug and know which token youre at
         if (token.getTokenString() != expected_value) {
-            throw std::runtime_error("Expected '" + expected_value + "' but got '" + tokenVector[state].getTokenString() + "'");
+            throw std::runtime_error("Expected '" + expected_value + "' but got: '" + tokenVector[state].getTokenString()  + "'");
         }
 
-        if ( tokenVector[state].isRBrace()   ){
-            cst->addChild( token );
-        } else if ( tokenVector[state].isSemicolon() ){
-            cst->addSibling( token );
+        if (state == 0){
+            cst->setRoot(new CSTNode(tokenVector[state]));
+        }else if (token.isLBrace() ){
             newStatement = true;
+            cst->addChild( cst->getRoot(), token );
+        }else if ( token.isSemicolon() ){
+            newStatement = true;
+            cst->addSibling( cst->getRoot(), token );
         }else if (newStatement){
-            cst->addChild( token );
+            cst->addChild( cst->getRoot(), token );
             newStatement = false;
         } else {
-            cst->addSibling( token ) ;
+            cst->addSibling( cst->getRoot(), token ) ;
         }
         state++;
+    } else {
+        throw std::runtime_error("Unexpected end of input");
     }
-    throw std::runtime_error("Unexpected end of input");
 }
+
+
+
 

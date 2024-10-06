@@ -18,15 +18,18 @@
 #include <string>
 #include "Token.hpp"
 #include "CST.hpp"
+#include "CSTNode.hpp"
 #include <vector>
 
 class Parser {
 public:
     //default constructor, on declaration we need a vector of tokens, then we definie the token as blank, and create a new cst object.
-    Parser(std::vector<Token>& incommingVector) : tokenVector(incommingVector) ,cst(new CST()){};
+    Parser(std::vector<Token>& incommingVector) : tokenVector(incommingVector) ,cst(new CST()), newStatement(false){};
 
-    void expect(const char& expected_value);
+    //a
     void expect(const std::string& expected_value);
+
+    //functions to check BNF standards
     void program();
     void main_procedure();
     void function_declaration();
@@ -48,7 +51,7 @@ public:
     void boolean_expression();
     void numerical_expression();
     bool relational_expression();
-    void boolean_operator();
+    bool boolean_operator();
     void numerical_operator();
     void numerical_operand();
     bool datatype_specifier();
@@ -56,7 +59,7 @@ public:
     void identifier_array_list();
     void identifier_list();
     void identifier();
-    void identifier_tail();
+    void printTree() { cst->printTree(); }
 
     //function to get get our cst tree with out tokens.
     CST* parse();
@@ -64,7 +67,7 @@ private:
 
     //possition in our vector which is passed in, and current state
     int state = 0;
-    bool newStatement;
+    bool newStatement = false;
     //vector passed in on declaration
     std::vector<Token> tokenVector;
     //concrete syntax tree object 

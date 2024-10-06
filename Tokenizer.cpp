@@ -115,7 +115,7 @@ Token Tokenizer::getToken() {
             //std::cout<<"found identifier"<<std::endl;
             //grab all the rest of the characters in the identifier
             tempText += c;
-            while (inputStream.get(c) && c != ' ' && c != '(' && c != ')'&& c != '[' && c != ']'&& c != '{' && c != '}' && c != ';') {
+            while (inputStream.get(c) && c != ' ' && c != '(' && c != ')'&& c != '[' && c != ']'&& c != '{' && c != '}' && c != ';'&& c != ',') {
                 tempText += c;
                 charPosition++;
             }
@@ -145,15 +145,19 @@ Token Tokenizer::getToken() {
 
         }else if(c == '('){
             token.setLParen();
+            token.setTokenString( "(");
             return token;
         }else if(c == ')'){
             token.setRParen();
+            token.setTokenString( ")");
             return token;
         }else if(c == '{'){
             token.setLBrace();
+            token.setTokenString( "{");
             return token;
         }else if(c == '}'){
             token.setRBrace();
+            token.setTokenString( "}");
             return token;
         }else if(c == '['){
             token.setLBracket();
@@ -163,6 +167,7 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == ';'){
             token.setSemicolon();
+            token.setTokenString( ";");
             return token;
         }else if(c == '='){
             //need a special case where if there is a equal after this then 
@@ -173,6 +178,7 @@ Token Tokenizer::getToken() {
             }else{
                 token.setAssignmentOperator();
             }
+            token.setTokenString( "=");
             return token;
         }else if(c == '-'){
             tempText = '-';
@@ -200,7 +206,7 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == ','){
             token.setComma();
-
+            token.setTokenString( ",");
             return token;
         }else if(c == '%'){
             token.setModulo();
