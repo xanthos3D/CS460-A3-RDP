@@ -11,8 +11,17 @@ class CST {
 public:
     //default constructer which  sets our first cstnode to nullptr
     CST() : root(nullptr) {}
+
     //function to set the root node to a new cstnode
     void setRoot(CSTNode* node) { root = node; }
+
+    //function to add cstnode to the leftchild
+    void addChild(CSTNode *root, Token token);
+
+    //funcxtion assd sctnode to be the right sibling
+    void addSibling(CSTNode *root, Token token);
+    //breadth first traversal to print out our cst
+    void printTree();  
 
 private:
     //object made of one cst node which connects to the other nodes apart of this data structure

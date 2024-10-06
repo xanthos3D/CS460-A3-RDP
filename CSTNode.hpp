@@ -7,27 +7,22 @@
 
 class CSTNode {
 public:
-    CSTNode(const Token& token) : token(token), leftChild(nullptr), rightSibling(nullptr) {}
-    CSTNode* getLeft() { return leftChild;}
-    CSTNode* getRight() { return rightSibling;}
-    Token getToken() { return token; }
-private:
-    Token token;
-    CSTNode* leftChild;
-    CSTNode* rightSibling;
+//default constructor for our sctnode, takes a token and declares a leftchild empty pointer and a right sibling empty pointer
+    CSTNode(const Token& token) : token(token), _leftChild(nullptr), _rightSibling(nullptr) {}
 
-void addChild(CSTNode* child) {
-    if (!leftChild) {
-        leftChild = child;  // If no children, set the first child
-    } else {
-        // Otherwise, find the rightmost sibling and add the child there
-        CSTNode* sibling = leftChild;
-        while (sibling->rightSibling) {
-            sibling = sibling->rightSibling;
-        }
-        sibling->rightSibling = child;  // Add as a right sibling
-    }
-}
+    //simple getters
+    CSTNode* getLeft() { return _leftChild;}
+    CSTNode* getRight() { return _rightSibling;}
+    Token getToken() { return token; }
+
+    //setters for the cstnode
+    void leftChild( CSTNode *newLeftChild ) { _leftChild = newLeftChild; }
+    void rightSibling(CSTNode *newRightSibling) { _rightSibling = newRightSibling; }
+
+private:
+    
+    Token token;
+    CSTNode *_leftChild, *_rightSibling;
 };
 
 

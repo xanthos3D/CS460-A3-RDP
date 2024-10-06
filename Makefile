@@ -17,7 +17,7 @@ LFLAGS =
 LIBS = 
 
 # define the C source files
-SRCS = main.cpp Token.cpp Tokenizer.cpp Parser.cpp
+SRCS = main.cpp Token.cpp Tokenizer.cpp Parser.cpp CST.cpp
 
 # define the C object files 
 #
