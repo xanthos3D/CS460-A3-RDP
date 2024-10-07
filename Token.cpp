@@ -19,9 +19,9 @@ Token::Token(int line, int pos)
           _assignmentOperator(false), _modulo(false),
           _plus(false), _minus(false), _asterisk(false), _divide(false), _caret(false),
           //Data Types
-          _int(false), _double(false), _char(false), _string(false),
+          _int(false), _double(false), _char(false), _string(false), _escChar(false),
           //Boolean Ops
-          _boolE(false), _boolNE(false), _boolGT(false), _boolLT(false),
+          _boolE(false),_boolNot(false), _boolNE(false), _boolGT(false), _boolLT(false),
           _boolGTE(false), _boolLTE(false), _boolAnd(false), _boolOr(false),
           _boolTrue(false), _boolFalse(false),
           _tokenString("") {}
@@ -53,6 +53,8 @@ bool& Token::isCarot(){return _caret;}
 bool& Token::isInt(){return _int;}
 bool& Token::isDouble(){return _double;}
 bool& Token::isChar(){return _char;}
+bool& Token::isEscChar() {return _escChar;}
+
 bool& Token::isString(){return _string;}
 
 bool& Token::isBoolE(){return _boolE;}
@@ -107,19 +109,26 @@ void Token::setChar(std::string input){
      _char = true;
      _tokenString = input;
 }
+
+void Token::setEscChar(std::string input){
+    _escChar = true;
+    _tokenString = input;
+
+}
+
 void Token::setString(std::string input){
      _string = true;
      _tokenString = input;
 }
 
 void Token::setBoolE(){ _boolE= true; }
-void Token::setBoolNot(){ _boolNot= true; }
+void Token::setBoolNot(){_boolNot = true; }
 void Token::setBoolNE(){ _boolNE= true; }
 void Token::setBoolGT(){ _boolGT= true; }
 void Token::setBoolLT(){ _boolLT= true; }
-void Token::setBoolGTE(){ _boolGTE= true; }
-void Token::setBoolLTE(){ _boolLTE= true; }
-void Token::setBoolAnd(){ _boolAnd= true; }
+void Token::setBoolGTE(){  _boolGTE = true; }
+void Token::setBoolLTE(){ _boolLTE = true; }
+void Token::setBoolAnd(){ _boolAnd = true; }
 void Token::setBoolOr(){ _boolOr= true; }
 void Token::setBoolTrue(){ _boolTrue= true; }
 void Token::setBoolFalse(){ _boolFalse= true; }
@@ -316,6 +325,14 @@ std::string Token::print() {
             output+= "Token:      ";
             output+= _tokenString;
             output+= "\n";
+        }else if(isEscChar()){
+            std::cout<< "ESC CHAR" <<std::endl;
+            std::cout<<"Token:      "<<_tokenString<<std::endl;
+
+            output+= "ESC CHAR\n";
+            output+= "Token:      ";
+            output+= _tokenString;
+            output+= "\n";
         }else if(isString()){
             std::cout<< "STRING" <<std::endl;
             std::cout<<"Token:      "<<_tokenString<<std::endl;
@@ -333,10 +350,10 @@ std::string Token::print() {
             output+= "==";
             output+= "\n";
         }else if(isBoolNot()){
-            std::cout<< "BOOLEAN_EQUAL" <<std::endl;
+            std::cout<< "BOOLEAN_NOT" <<std::endl;
             std::cout<<"Token:      "<<"!"<<std::endl;
 
-            output+= "BOOLEAN_EQUAL\n";
+            output+= "BOOLEAN_NOT\n";
             output+= "Token:      ";
             output+= "!";
             output+= "\n";
@@ -346,7 +363,7 @@ std::string Token::print() {
 
             output+= "BOOLEAN_NOT_EQUAL\n";
             output+= "Token:      ";
-            output+= "==";
+            output+= "!=";
             output+= "\n";
         }else if(isBoolGT()){
             std::cout<< "BOOLEAN_GREATER_THAN" <<std::endl;
