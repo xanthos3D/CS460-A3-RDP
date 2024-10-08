@@ -5,29 +5,28 @@
 #include <string>
 #include "Token.hpp"
 
+
+/** **************************************************************************************
+CstNode class
+
+
+ *****************************************************************************************/
 class CSTNode {
 public:
-    CSTNode(const Token& token) : token(token), leftChild(nullptr), rightSibling(nullptr) {}
-    CSTNode* getLeft() { return leftChild;}
-    CSTNode* getRight() { return rightSibling;}
+    CSTNode(const Token& token ) : token(token), _leftChild(nullptr), _rightSibling(nullptr), child(false) {}
+    CSTNode* getLeft() { return _leftChild;}
+    CSTNode* getRight() { return _rightSibling;}
+    void leftChild( CSTNode *newLeftChild ) { _leftChild = newLeftChild; }
+    void rightSibling(CSTNode *newRightSibling) { _rightSibling = newRightSibling; }
     Token getToken() { return token; }
+    void setChild(bool temp)   { child = temp; }        // this is to know when we are in a new statemnt
+                                                        // and our tree can refelct when to drop a level
+
+    bool isChild() { return child; }
 private:
     Token token;
-    CSTNode* leftChild;
-    CSTNode* rightSibling;
-
-void addChild(CSTNode* child) {
-    if (!leftChild) {
-        leftChild = child;  // If no children, set the first child
-    } else {
-        // Otherwise, find the rightmost sibling and add the child there
-        CSTNode* sibling = leftChild;
-        while (sibling->rightSibling) {
-            sibling = sibling->rightSibling;
-        }
-        sibling->rightSibling = child;  // Add as a right sibling
-    }
-}
+    bool child = false;
+    CSTNode *_leftChild, *_rightSibling;
 };
 
 

@@ -1,26 +1,8 @@
-//
-// Created by xmani on 9/4/2024.
-//
-
+#include <string>
 
 #ifndef PROJECT1_PHASE2_TOKEN_HPP
 #define PROJECT1_PHASE2_TOKEN_HPP
 
-
-#include <string>
-
-enum class TokenType {
-
-    _identifier, _doubleQuote,_singleQuote, _semicolon,_comma, _eof,
-    //braces and brackets
-    _LParen, _RParen, _LBrace, _RBrace,_LBracket, _RBracket,
-    //opperators
-    _assignmentOperator, _modulo, _plus, _minus, _asterisk, _divide, _caret,
-    //data types
-    _int,_double, _char, _string,
-    //boolean opperators
-     _boolE,_boolNot, _boolNE, _boolGT, _boolLT, _boolGTE, _boolLTE, _boolAnd, _boolOr, _boolTrue,  _boolFalse
-};
 
 class Token {
 public:
@@ -54,6 +36,7 @@ public:
     bool &isInt();
     bool &isDouble();
     bool &isChar();
+    bool &isEscChar();
     bool &isString();
 
     bool &isBoolE();
@@ -95,6 +78,7 @@ public:
     void setInt(std::string);
     void setDouble(std::string);
     void setChar(std::string);
+    void setEscChar(std::string);
     void setString(std::string);
 
     void setBoolE();
@@ -114,7 +98,8 @@ public:
 
     //if a token has more complex information then store it in the token string
     std::string getTokenString();
-
+    int getLineNum() { return _lineNumber; }
+    int getCharPos() { return _charPos; }
     //useful tester function so we can print the tokens and there type.
     std::string print();
 
@@ -126,11 +111,10 @@ private:
     //opperators
     _assignmentOperator, _modulo, _plus, _minus, _asterisk, _divide, _caret,
     //data types
-    _int,_double, _char, _string,
+    _int,_double, _char, _string, _escChar,
     //boolean opperators
      _boolE,_boolNE, _boolGT, _boolLT, _boolGTE, _boolLTE, _boolAnd, _boolOr, _boolNot, _boolTrue,  _boolFalse;
 
-    TokenType type;
 
     std::string _tokenString;
     int _lineNumber, _charPos;

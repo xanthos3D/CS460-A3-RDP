@@ -29,6 +29,8 @@ generate PDF output or use fancy graphics output of any kind for this assignment
 #include <iostream>
 #include <fstream>
 #include<stack>
+#include "CSTNode.hpp"
+#include "CST.hpp"
 #include "Parser.hpp"
 #include "Token.hpp"
 #include "Tokenizer.hpp"
@@ -92,7 +94,10 @@ int main(int argc, char *argv[]) {
 
     //call our parse function built into our parser to make the CST
     CST* tree = CSTparser.parse();
+    //tree->printTree();
+    std::cout<<"printing out CST Tree ++++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
 
+    CSTparser.printTree();
     return 0;
 }
 
@@ -116,7 +121,7 @@ std::vector<Token> buildTokenVector(Tokenizer& sourceFile){
         token.print();
         tokenVector.push_back(token);
     }
-    cout<<"token vectyor complete. ++++++++++++++++++++++++++++++++++++ <<"<<endl;
+    cout<<"token vector complete. ++++++++++++++++++++++++++++++++++++ <<"<<endl;
     return tokenVector;
 }
 
