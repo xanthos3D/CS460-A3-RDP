@@ -34,10 +34,6 @@ generate PDF output or use fancy graphics output of any kind for this assignment
 #include "Parser.hpp"
 #include "Token.hpp"
 #include "Tokenizer.hpp"
-#include "CST.cpp"
-#include "Parser.cpp"
-#include "Token.cpp"
-#include "Tokenizer.cpp"
 #include <vector>
 #include <stack>
 
@@ -609,7 +605,7 @@ string commentParser(std::ifstream& inputStream,string fileName){
         } else if (state == 5){
             //checks for escape chars
             if (c == '\\'){
-                file += c;
+                file+= c;
                 inputStream.get(c);
                 file += c;
                 inputStream.get(c);

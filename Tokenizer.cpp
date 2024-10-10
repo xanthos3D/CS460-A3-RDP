@@ -161,11 +161,11 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == '['){
             token.setLBracket();
-            token.setTokenString( "[");
+            token.setTokenString("[");
             return token;
         }else if(c == ']'){
             token.setRBracket();
-            token.setTokenString( "]");
+            token.setTokenString("]");
             return token;
         }else if(c == ';'){
             token.setSemicolon();
@@ -195,18 +195,18 @@ Token Tokenizer::getToken() {
                 token.setInt(tempText);
             }else{
                 token.setMinus();
-                token.setTokenString( "-");
+                token.setTokenString("-");
             }
             inputStream.putback(c);
             return token;
         }else if(c == '\"'){
             token.setDoubleQuote();
-            token.setTokenString( "\"");
+            token.setTokenString("\"");
             state = 1;
             return token;
         }else if(c == '\''){
             token.setSingleQuote();
-            token.setTokenString( "\'");
+            token.setTokenString("\'");
             state = 3;
             return token;
         }else if(c == ','){
@@ -215,11 +215,11 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == '%'){
             token.setModulo();
-            token.setTokenString( "%");
+            token.setTokenString("%");
             return token;
         }else if(c == '*'){
             token.setAsterisk();
-            token.setTokenString( "*");
+            token.setTokenString("*");
             return token;
         }else if(c == '+'){
             tempText = '+';
@@ -305,8 +305,8 @@ Token Tokenizer::getToken() {
 
             return token;
             //this is null at the end of string - in the case of an unclosed string (missing ending double quote)
-        }else if(c == '\000' || c == '\0'){
-            std::cout<<"End of string"<<std::endl;
+        }else if (c == '\000' || c == '\0'){
+            std::cout << "End of String" << std::endl;
             token.setEndOfFile();
 
             return token;
@@ -336,7 +336,7 @@ Token Tokenizer::getToken() {
     }else if(state == 2){
         inputStream.get(c);
         token.setDoubleQuote();
-        token.setTokenString( "\"");
+        token.setTokenString("\"");
         state = 0;
         return token;
 

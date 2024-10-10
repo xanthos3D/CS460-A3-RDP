@@ -384,16 +384,16 @@ checks that the follwoing statement is a assignment statement that follows BNF r
  *****************************************************************************************/
 void Parser::assignment_statement(){
     expect( tokenVector[state].getTokenString() );
-    if(tokenVector[state].isLBracket()){
+    if (tokenVector[state].isLBracket()){
         expect("[");
-        expect(tokenVector[state].getTokenString());
+        expect( tokenVector[state].getTokenString() );
         expect("]");
     }
-    expect( "=");
+    expect("=");
 
     if (tokenVector[state].isSingleQuote()){
         single_quoted_string();
-    }else if(tokenVector[state].isDoubleQuote()) {
+    }else if (tokenVector[state].isDoubleQuote()) {
         double_quoted_string();
     }else {
         expression();
@@ -466,9 +466,9 @@ void Parser::selection_statement(){
     boolean_expression();
 
     /*********************************************************************
-     * WE NEED TO INCLUDE IF THERE IS == BEFORE HITTING THE CLOSING PAREN*
-     *                       LIKE IN INPUT FILE 2                        *
-     * *******************************************************************/
+    * WE NEED TO INCLUDE IF THERE IS == BEFORE HITTING THE CLOSING PAREN*
+    *                       LIKE IN INPUT FILE 2                        *
+    * *******************************************************************/
 
     //closed paren
     expect(")");
@@ -616,19 +616,19 @@ void Parser::numerical_expression() {
 
         //loop is empty, but the heavy lifting is done in the bool checks
         if(tokenVector[state].isLParen()){
-            std::cout<<"begin paren inside of neumerical expression"<<std::endl;
+            std::cout<<"begin paren inside of numerical expression"<<std::endl;
             //eat up the parens
             expect("(");
-            //we then need to recurse into a new neumeric expression call.
+            //we then need to recurse into a new numeric expression call.
             numerical_expression();
             //then we expect a close paren
             expect(")");
 
-            std::cout<<"end paren inside of neumerical expression"<<std::endl;
+            std::cout<<"end paren inside of numerical expression"<<std::endl;
 
         }else{
             eat = numerical_operand();
-            //attempt to eat, but not a operand
+            //attempt to eat, but not an operand
 
             if(eat == false && tokenVector[state].isIdentifier()){
                 //call expression function to make function call?
@@ -794,8 +794,8 @@ checks if token is followed by identifier list or array lsit
  *****************************************************************************************/
 void Parser::identifier_and_identifier_array_list() {
     std::cout<<"in identifier_and_identifier_array_list"<<std::endl;
-    if(tokenVector[state].isInt()){
-        state -=2;
+    if (tokenVector[state].isInt()){
+        state -= 2;
     }
     if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isLBracket()) {
         identifier_array_list();
