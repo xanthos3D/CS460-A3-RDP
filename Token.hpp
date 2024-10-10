@@ -92,7 +92,7 @@ public:
     void setBoolOr();
     void setBoolTrue();
     void setBoolFalse();
-    
+
     //sets the tokenstring
     void setTokenString(std::string);
 
@@ -113,7 +113,7 @@ private:
     //data types
     _int,_double, _char, _string, _escChar,
     //boolean opperators
-     _boolE,_boolNE, _boolGT, _boolLT, _boolGTE, _boolLTE, _boolAnd, _boolOr, _boolNot, _boolTrue,  _boolFalse;
+    _boolE,_boolNE, _boolGT, _boolLT, _boolGTE, _boolLTE, _boolAnd, _boolOr, _boolNot, _boolTrue,  _boolFalse;
 
 
     std::string _tokenString;
