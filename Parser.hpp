@@ -59,6 +59,8 @@ public:
     void identifier_array_list();
     void identifier_list();
     void identifier();
+    void single_quoted_string();
+    void double_quoted_string();
     void printTree() { cst->printTree(); }
 
     //function to get get our cst tree with out tokens.
@@ -70,7 +72,7 @@ private:
     bool newStatement = false;
     //vector passed in on declaration
     std::vector<Token> tokenVector;
-    //concrete syntax tree object 
+    //concrete syntax tree object
     CST* cst;
 };
 

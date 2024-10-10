@@ -125,7 +125,7 @@ Token Tokenizer::getToken() {
             return token;
 
         }if (isdigit(c)){
-                tempText += c;
+            tempText += c;
 
             while(inputStream.get(c) && isdigit(c)){
                 tempText += c;
@@ -135,11 +135,11 @@ Token Tokenizer::getToken() {
             //error state for digit exclude all input but valid input.
             //man need more statemens in if to correctly protect agianst all cases where a digit is broken by a symbol
             if(isalpha(c)){
-                
+
                 std::cout<<"Syntax error on line "<<lineNumber<<": invalid integer"<<std::endl;
                 exit(1);
             }
-            
+
             inputStream.putback(c);
             return token;
 
@@ -161,16 +161,18 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == '['){
             token.setLBracket();
+            token.setTokenString( "[");
             return token;
         }else if(c == ']'){
             token.setRBracket();
+            token.setTokenString( "]");
             return token;
         }else if(c == ';'){
             token.setSemicolon();
             token.setTokenString( ";");
             return token;
         }else if(c == '='){
-            //need a special case where if there is a equal after this then 
+            //need a special case where if there is a equal after this then
             if(inputStream.peek() == '='){
                 //eat up next input
                 inputStream.get(c);
@@ -193,15 +195,18 @@ Token Tokenizer::getToken() {
                 token.setInt(tempText);
             }else{
                 token.setMinus();
+                token.setTokenString( "-");
             }
             inputStream.putback(c);
             return token;
-        }else if(c == '"'){
+        }else if(c == '\"'){
             token.setDoubleQuote();
+            token.setTokenString( "\"");
             state = 1;
             return token;
         }else if(c == '\''){
             token.setSingleQuote();
+            token.setTokenString( "\'");
             state = 3;
             return token;
         }else if(c == ','){
@@ -210,15 +215,28 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == '%'){
             token.setModulo();
-
+            token.setTokenString( "%");
             return token;
         }else if(c == '*'){
             token.setAsterisk();
-
+            token.setTokenString( "*");
             return token;
         }else if(c == '+'){
-            token.setPlus();
+            tempText = '+';
+            inputStream.get(c);
+            if (isdigit(c)){
+                tempText += c;
 
+                while(inputStream.get(c) && isdigit(c)){
+                    tempText += c;
+                    charPosition++;
+                }
+                token.setInt(tempText);
+            }else{
+                token.setPlus();
+                token.setTokenString("+");
+            }
+            inputStream.putback(c);
             return token;
         }else if(c == '>'){
             std::cout<<"found > "<<std::endl;
@@ -226,8 +244,10 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolGTE();
+                token.setTokenString(">=");
             }else{
                 token.setBoolGT();
+                token.setTokenString(">");
             }
 
             return token;
@@ -236,8 +256,10 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolLTE();
+                token.setTokenString("<=");
             }else{
                 token.setBoolLT();
+                token.setTokenString("<");
             }
             return token;
         }else if(c == '&'){
@@ -245,6 +267,7 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolAnd();
+                token.setTokenString("&&");
             }else{
                 std::cout<< "malformed && on line: "<<lineNumber<<" position: "<<charPosition<<std::endl;
                 exit(1);
@@ -256,6 +279,7 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolOr();
+                token.setTokenString("||");
             }else{
                 std::cout<< "malformed || on line: "<<lineNumber<<" position: "<<charPosition<<std::endl;
                 exit(1);
@@ -264,18 +288,26 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == '/'){
             token.setDivide();
-
+            token.setTokenString("/");
             return token;
-        // additional case for ! and !=
+            // additional case for ! and !=
         }else if(c == '!'){
             std::cout<<"found > "<<std::endl;
             if(inputStream.peek() == '='){
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolNE();
+                token.setTokenString("!=");
             }else{
                 token.setBoolNot();
+                token.setTokenString("!");
             }
+
+            return token;
+            //this is null at the end of string - in the case of an unclosed string (missing ending double quote)
+        }else if(c == '\000' || c == '\0'){
+            std::cout<<"End of string"<<std::endl;
+            token.setEndOfFile();
 
             return token;
         }
@@ -283,9 +315,14 @@ Token Tokenizer::getToken() {
         //state if we find a double quote chane the way we take in tokens to treat everything after the first quote
         //and change state once we find another double quote token.
     }else if(state == 1){
-        while (inputStream.get(c) && c != '"') {
+        while (inputStream.get(c) && c != '\"') {
             tempText += c;
             charPosition++;
+            if (c == '\\'){
+                inputStream.get(c);
+                tempText += c;
+                charPosition++;
+            }
         }
 
         inputStream.putback(c);
@@ -299,12 +336,13 @@ Token Tokenizer::getToken() {
     }else if(state == 2){
         inputStream.get(c);
         token.setDoubleQuote();
+        token.setTokenString( "\"");
         state = 0;
         return token;
 
-    //state to handle interior of single quotes.
+        //state to handle interior of single quotes.
     }else if(state == 3){
-         while (inputStream.get(c) && c != '\'') {
+        while (inputStream.get(c) && c != '\'') {
             tempText += c;
             charPosition++;
         }
@@ -317,12 +355,12 @@ Token Tokenizer::getToken() {
         token.setString(tempText);
 
         return token;
-    //state to handle ending '
+        //state to handle ending '
     }else if(state == 4){
         inputStream.get(c);
         token.setSingleQuote();
         state = 0;
-        return token; 
+        return token;
     }
 
 
@@ -343,7 +381,7 @@ Token Tokenizer::getToken() {
         // a good idea to have an "else" when you have a sequence of "if ... else if"
         // statements so that you do not end up with a case that has not been handled.
         // For example, you forgot to account for one of the cases.
-        std::cout << "There is a logic error in unction Tokenizer::getToken.\n";
+        std::cout << "There is a logic error in function Tokenizer::getToken.\n";
         std::cout << "The function doesn't know how to process this character: ->" << c << "<-\n";
         exit(1);
     }
