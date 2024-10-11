@@ -9,18 +9,18 @@
 //default constructor, want to give it line data and set up some default vairables apart of the object.
 Token::Token(int line, int pos)
         : _lineNumber(line), _charPos(pos),
-        //Misc
+          //Misc
           _identifier(false), _doubleQuote(false), _singleQuote(false),
           _semicolon(false), _comma(false), _eof(false),
-        //Brackets & Parenthesis
+          //Brackets & Parenthesis
           _LParen(false), _RParen(false), _LBrace(false), _RBrace(false),
           _LBracket(false), _RBracket(false),
-        //Operators
+          //Operators
           _assignmentOperator(false), _modulo(false),
           _plus(false), _minus(false), _asterisk(false), _divide(false), _caret(false),
-        //Data Types
+          //Data Types
           _int(false), _double(false), _char(false), _string(false), _escChar(false),
-        //Boolean Ops
+          //Boolean Ops
           _boolE(false),_boolNot(false), _boolNE(false), _boolGT(false), _boolLT(false),
           _boolGTE(false), _boolLTE(false), _boolAnd(false), _boolOr(false),
           _boolTrue(false), _boolFalse(false),
@@ -72,42 +72,42 @@ bool& Token::isBoolFalse(){return _boolFalse;}
 
 
 //create setter functions
-void Token::setIdentifier(std::string input) {
+void Token::setIdentifier(std::string input) { 
     _identifier = true;
     _tokenString = input;
-}
-void Token::setDoubleQuote(){ _doubleQuote = true; }
-void Token::setSingleQuote(){ _singleQuote = true; }
-void Token::setSemicolon(){ _semicolon = true; }
-void Token::setComma(){ _comma = true; }
+ }
+void Token::setDoubleQuote(){ _doubleQuote = true; setTokenString("\""); }
+void Token::setSingleQuote(){ _singleQuote = true; setTokenString("'"); }
+void Token::setSemicolon(){ _semicolon = true; setTokenString(";");}
+void Token::setComma(){ _comma = true; setTokenString(",");}
 void Token::setEndOfFile(){ _eof = true; }
 
-void Token::setLParen(){ _LParen = true; }
-void Token::setRParen(){ _RParen = true; }
-void Token::setLBrace(){ _LBrace = true; }
-void Token::setRBrace(){ _RBrace= true; }
-void Token::setLBracket(){ _LBracket = true; }
-void Token::setRBracket(){ _RBracket = true; }
+void Token::setLParen(){ _LParen = true; setTokenString("(");}
+void Token::setRParen(){ _RParen = true; setTokenString(")");}
+void Token::setLBrace(){ _LBrace = true; setTokenString("{");}
+void Token::setRBrace(){ _RBrace= true; setTokenString("}");}
+void Token::setLBracket(){ _LBracket = true; setTokenString("[");}
+void Token::setRBracket(){ _RBracket = true; setTokenString("]");}
 
-void Token::setAssignmentOperator() { _assignmentOperator = true; }
-void Token::setModulo(){ _modulo = true; }
-void Token::setPlus(){ _plus = true; }
-void Token::setMinus(){ _minus = true; }
-void Token::setAsterisk(){ _asterisk = true; }
-void Token::setDivide(){ _divide = true; }
-void Token::setCarot(){ _caret = true; }
+void Token::setAssignmentOperator() { _assignmentOperator = true; setTokenString("=");}
+void Token::setModulo(){ _modulo = true; setTokenString("%"); }
+void Token::setPlus(){ _plus = true; setTokenString("+");}
+void Token::setMinus(){ _minus = true; setTokenString("-");}
+void Token::setAsterisk(){ _asterisk = true; setTokenString("*");}
+void Token::setDivide(){ _divide = true; setTokenString("/");}
+void Token::setCarot(){ _caret = true;setTokenString("^"); }
 
-void Token::setInt(std::string input) {
+void Token::setInt(std::string input) { 
     _int = true;
     _tokenString = input;
 }
 void Token::setDouble(std::string input){
-    _double = true;
-    _tokenString = input;
+     _double = true; 
+     _tokenString = input;
 }
 void Token::setChar(std::string input){
-    _char = true;
-    _tokenString = input;
+     _char = true;
+     _tokenString = input;
 }
 
 void Token::setEscChar(std::string input){
@@ -117,21 +117,21 @@ void Token::setEscChar(std::string input){
 }
 
 void Token::setString(std::string input){
-    _string = true;
-    _tokenString = input;
+     _string = true;
+     _tokenString = input;
 }
 
-void Token::setBoolE(){ _boolE= true; }
-void Token::setBoolNot(){_boolNot = true; }
-void Token::setBoolNE(){ _boolNE= true; }
-void Token::setBoolGT(){ _boolGT= true; }
-void Token::setBoolLT(){ _boolLT= true; }
-void Token::setBoolGTE(){  _boolGTE = true; }
-void Token::setBoolLTE(){ _boolLTE = true; }
-void Token::setBoolAnd(){ _boolAnd = true; }
-void Token::setBoolOr(){ _boolOr= true; }
-void Token::setBoolTrue(){ _boolTrue= true; }
-void Token::setBoolFalse(){ _boolFalse= true; }
+void Token::setBoolE(){ _boolE= true; setTokenString("==");}
+void Token::setBoolNot(){_boolNot = true; setTokenString("!");}
+void Token::setBoolNE(){ _boolNE= true; setTokenString("!=");}
+void Token::setBoolGT(){ _boolGT= true; setTokenString(">");}
+void Token::setBoolLT(){ _boolLT= true; setTokenString("<");}
+void Token::setBoolGTE(){  _boolGTE = true; setTokenString(">=");}
+void Token::setBoolLTE(){ _boolLTE = true; setTokenString("<=");}
+void Token::setBoolAnd(){ _boolAnd = true;setTokenString("&&"); }
+void Token::setBoolOr(){ _boolOr= true; setTokenString("||");}
+void Token::setBoolTrue(){ _boolTrue= true; setTokenString("true");}
+void Token::setBoolFalse(){ _boolFalse= true; setTokenString("false");}
 
 //or we want to return the token string.
 std::string Token::getTokenString() { return _tokenString; }
@@ -343,7 +343,7 @@ std::string Token::print() {
             output+= "\n";
         }else if(isBoolE()){
             std::cout<< "BOOLEAN_EQUAL" <<std::endl;
-            std::cout<<"Token:      "<<"=="<<std::endl;
+            std::cout<<"Token:      "<<_tokenString<<std::endl;
 
             output+= "BOOLEAN_EQUAL\n";
             output+= "Token:      ";
@@ -425,10 +425,10 @@ std::string Token::print() {
             std::cout<< "BOOLEAN_FALSE" <<std::endl;
             std::cout<<"Token:      "<<"False"<<std::endl;
         }else{
-            std::cout << "Token::print -- unknown token.\n" << std::endl;
-            exit(3);
+        std::cout << "Token::print -- unknown token.\n" << std::endl;
+        exit(3);
         }
-        output+= "\n";
+       output+= "\n";
     }
     return output;
 

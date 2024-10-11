@@ -20,7 +20,7 @@ public:
     void rightSibling(CSTNode *newRightSibling) { _rightSibling = newRightSibling; }
     Token getToken() { return token; }
     void setChild(bool temp)   { child = temp; }        // this is to know when we are in a new statemnt
-    // and our tree can refelct when to drop a level
+                                                        // and our tree can refelct when to drop a level
 
     bool isChild() { return child; }
 private:

@@ -26,7 +26,7 @@ Checks program meets BNF requirements
 @pre:
 @post: recusively calls one of our functions based on the given token
  *****************************************************************************************/
-void Parser::program() {
+ void Parser::program() {
     while(!tokenVector[state].isEOF()){
 
         std::cout<<"+++block start token++++++++++++++++++++++++++++++++++++++++++ "<<std::endl;
@@ -125,7 +125,7 @@ Checks procedure_declaration meets BNF requirements
 @post:
  *****************************************************************************************/
 void Parser::procedure_declaration(){
-    expect( "procedure");
+     expect( "procedure");
     if ( tokenVector[state].isIdentifier() ) {
         expect(tokenVector[state].getTokenString());
     }
@@ -151,21 +151,21 @@ checks that the parameter lsit  follows BNF rules
 @post:generates cst for parameters
  *****************************************************************************************/
 void Parser::parameter_list(){
-    //if we find a data type
-    if ( datatype_specifier() ){
-        //call expect with that data type
-        expect(tokenVector[state].getTokenString() );
-    }
-    //then expect variable name
-    identifier();
+        //if we find a data type
+        if ( datatype_specifier() ){
+            //call expect with that data type
+            expect(tokenVector[state].getTokenString() );
+        }
+        //then expect variable name
+        identifier();
 
-    // then we check to see if a comma is present
-    if ( tokenVector[state].isComma() ) {
-        //if it is then add it
-        expect(",");
-        // and recuse until we are out of parameters to add.
-        parameter_list();
-    }
+        // then we check to see if a comma is present
+        if ( tokenVector[state].isComma() ) {
+            //if it is then add it
+            expect(",");
+            // and recuse until we are out of parameters to add.
+            parameter_list();
+        }
 }
 
 
@@ -177,7 +177,7 @@ checks that the follwoing statement is a block statement that follows BNF rules
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::block_statement(){
+ void Parser::block_statement(){
     expect( "{");
     if( !tokenVector[state].isRParen()) {
         compound_statement();
@@ -215,27 +215,37 @@ checks that the follwoing statement makes sure its a statemtn defined in BNF
  *****************************************************************************************/
 void Parser::statement(){
 
-    std::cout<<"statement called"<<std::endl;
-
-    //make a temp token?
+    //make a temp token? 
     Token token = tokenVector[state];
+
+    std::cout<<"statement called test: ("<< token.getTokenString()<<")"<<std::endl;
 
     //cases to recurse through a variety of different statements.
     if (token.getTokenString() == "return"){
+        std::cout<<"return found"<<std::endl;
         return_statement();
     }else if ( token.getTokenString() == "if"){
         std::cout<<"if found"<<std::endl;
         selection_statement();
+    }else if (token.getTokenString() == "else"){
+        std::cout<<"else found"<<std::endl;
+        selection_statement();
     }else if (token.getTokenString() == "printf"){
+        std::cout<<"printf found"<<std::endl;
         printf_statement();
     }else if (token.getTokenString() == "for"){
+        std::cout<<"for found"<<std::endl;
         iteration_statement();
-    } else if ((token.isIdentifier() && tokenVector[state+1].isAssignmentOperator()) || (token.isIdentifier() && tokenVector[state + 1].isLBracket())){
+    } else if (token.isIdentifier() && tokenVector[state+1].isAssignmentOperator() ){
+        std::cout<<"assignment found"<<std::endl;
         assignment_statement();
-
-        //case which handles variable declarizations and assignments.
+    
+    //case which handles variable declarizations and assignments.
     } else if ( datatype_specifier() || token.isIdentifier() ) {
+        std::cout<<"declaration found: "<< token.getTokenString()<<std::endl;
         declaration_statement();
+    }else{
+        std::cout<<"error?"<<std::endl;
     }
 }
 
@@ -249,13 +259,13 @@ checks that the follwoing statement is a return statement that follows BNF rules
 @post:
  *****************************************************************************************/
 void Parser::return_statement(){
-    expect("return");
-    if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
-        expect(tokenVector[state].getTokenString());
-    }
-    else {
-        expression();
-    }
+        expect("return");
+        if (tokenVector[state].isSingleQuote() || tokenVector[state].isDoubleQuote()) {
+            expect(tokenVector[state].getTokenString());
+        }
+        else {
+            expression();
+        }
     expect(";");
 }
 
@@ -289,6 +299,7 @@ void Parser::declaration_statement(){
         expect("[");
         identifier_and_identifier_array_list();
     }
+
     //if we see a comma after ward, that means that multiple things are being declared
     if ( tokenVector[state].isComma()){
         expect(",");
@@ -359,7 +370,7 @@ void Parser::printf_statement(){
         expect("\"");
         expect(tokenVector[state].getTokenString());
         expect("\"");
-        //if there is a comma, variables may be involved, so account for those here
+        //if there is a comma, variables may be involved, so acount for those here
         if ( tokenVector[state].isComma() ){
             expect(",");
             identifier_and_identifier_array_list();
@@ -464,12 +475,6 @@ void Parser::selection_statement(){
     expect("(");
     //bool expression
     boolean_expression();
-
-    /*********************************************************************
-     * WE NEED TO INCLUDE IF THERE IS == BEFORE HITTING THE CLOSING PAREN*
-     *                       LIKE IN INPUT FILE 2                        *
-     * *******************************************************************/
-
     //closed paren
     expect(")");
     // then a block statement
@@ -507,7 +512,7 @@ checks that the follwoing statement is a initialization expression that follows 
 @pre:
 @post:
  *****************************************************************************************/
-void Parser::expression(){
+ void Parser::expression(){
     std::cout<<"in expression"<<std::endl;
     if ( tokenVector[state].isBoolTrue() || tokenVector[state].isBoolFalse() ) {
         boolean_expression();
@@ -525,18 +530,18 @@ void Parser::expression(){
         expect( tokenVector[state].getTokenString() );
         return;
     }else if (tokenVector[state].isIdentifier()) {
-        std::cout<<"in expression, expecting variable"<<std::endl;
-        if ( boolean_operator() || relational_expression() ) {
-            boolean_expression();
+         std::cout<<"in expression, expecting variable"<<std::endl;
+            if ( relational_expression() || relational_expression() ) {
+                boolean_expression();
+            }
+            numerical_expression();
+            }
+        if ( tokenVector[state].isLParen() ) {
+            expect("(");
+            expression();
+            expect(")");
         }
-        numerical_expression();
-    }
-    if ( tokenVector[state].isLParen() ) {
-        expect("(");
-        expression();
-        expect(")");
-    }
-}
+ }
 
 
 
@@ -553,9 +558,9 @@ void Parser::initialization_statement(){
         expect( tokenVector[state].getTokenString() );
         expect( tokenVector[state].getTokenString() );
         if  (tokenVector[state].isSingleQuote() ){
-            single_quoted_string();
+            // single_quote_string();
         } else if ( tokenVector[state].isDoubleQuote() ){
-            double_quoted_string();
+            // double_quote_string();
         } else {
             expression();
         }
@@ -574,22 +579,101 @@ checks that the follwoing expression is a boolean expression that follows BNF ru
 @post: creates cst expression for boolean
  *****************************************************************************************/
 void Parser::boolean_expression(){
+
     std::cout<<"in boolean_expression"<<std::endl;
     // if we find keyword true or false
     if (tokenVector[state].isBoolTrue()){
         expect( "TRUE");
-    }else if (tokenVector[state].isBoolFalse()){
-        expect( "FALSE");
-        //if we find a open paren
-    }else if ( tokenVector[state].isLParen() ){
-        expect("(");
-        // if we find a identifier
-        if (tokenVector[state].isIdentifier()) {
-            expect( tokenVector[state].getTokenString() );
-            boolean_operator();
+
+        // then check to see if a operator follows it.
+        if(relational_expression()){
+            //then another expresion should follow it
             boolean_expression();
         }
+    }else if (tokenVector[state].isBoolFalse()){
+        expect( "FALSE");
+
+        // then check to see if a operator follows it.
+        if(relational_expression()){
+            //then another expresion should follow it
+            boolean_expression();
+        }
+
+    //if we find a identifier
+    }else if(tokenVector[state].isIdentifier()){
+
+        //could be a variable so eat up input
+        expect(tokenVector[state].getTokenString());
+
+        //could be a function call
+        if(tokenVector[state].isLParen()){
+
+        }
+
+        //could be an array refrence
+        if(tokenVector[state].isLBracket()){
+
+        }
+
+       //after we figure out what we are working with then check if next symbol is a bool operator
+        if(relational_expression()){
+            //then another expresion should follow it
+            boolean_expression();
+        //it could also be a numerical operator which in that case
+        }else if(numerical_operator()){
+            //then call numericla expression after we eat the numerical operator.
+            numerical_expression();
+        }
+
+    //if we find a open paren
+    }else if(tokenVector[state].isBoolNot()){
+
+        //eat !
+        expect("!");
+
+        //recursively call our boolean expression
+        boolean_expression();
+
+    //if we find a open paren
+    }else if(tokenVector[state].isDoubleQuote()){
+
+        // note, do we need to acount for ' (char) ' as well?
+        //eat ""
+        expect("\"");
+        //we expect a string after the first quote
+        if(tokenVector[state].isString()){
+            //eat string, then quote
+            expect(tokenVector[state].getTokenString());
+            expect("\"");
+        }else{
+            std::cout<<"in boolean expression expected a string after a quote but recieved: "<<tokenVector[state].getTokenString()<< std::endl;
+        }
+
+        //recursively call our boolean expression
+        boolean_expression();
+
+    //if we find a open paren
+    }else if (tokenVector[state].isLParen() ){
+        //eat paren
+        expect("(");
+
+        // if we find a identifier
+        if (tokenVector[state].isIdentifier()) {
+            //could just recieve a identifier by its self so recursive call so its caught by our 
+            //case above where the identifier could be a array for function call.
+            boolean_expression();
+
+        }
+        std::cout<<"here!"<<std::endl;
         expect(")");
+
+        if(relational_expression()){
+            //then another expresion should follow it
+            boolean_expression();
+        //it could also be a numerical operator which in that case
+        }
+
+
     }else{
 
         numerical_expression();
@@ -597,6 +681,12 @@ void Parser::boolean_expression(){
             expect( tokenVector[state].getTokenString() );
         }
         numerical_expression();
+
+         //after we figure out what we are working with then check if next symbol is a operator
+        if(relational_expression()){
+            //then another expresion should follow it
+            boolean_expression();
+        }
     }
     std::cout<<"end boolean_expression"<<std::endl;
 }
@@ -609,41 +699,41 @@ checks that the follwoing expression is a numerical expression that follows BNF 
 @post:
  *****************************************************************************************/
 void Parser::numerical_expression() {
-    std::cout<<"in numerical_expression"<<std::endl;
+     std::cout<<"in numerical_expression"<<std::endl;
 
-    bool eat = true;
-    while(eat){
+        bool eat = true;
+        while(eat){
 
-        //loop is empty, but the heavy lifting is done in the bool checks
-        if(tokenVector[state].isLParen()){
-            std::cout<<"begin paren inside of neumerical expression"<<std::endl;
-            //eat up the parens
-            expect("(");
-            //we then need to recurse into a new neumeric expression call.
-            numerical_expression();
-            //then we expect a close paren
-            expect(")");
+            //loop is empty, but the heavy lifting is done in the bool checks
+            if(tokenVector[state].isLParen()){
+                std::cout<<"begin paren inside of neumerical expression"<<std::endl;
+                //eat up the parens
+                expect("(");
+                //we then need to recurse into a new neumeric expression call.
+                numerical_expression();
+                //then we expect a close paren
+                expect(")");
 
-            std::cout<<"end paren inside of neumerical expression"<<std::endl;
+                std::cout<<"end paren inside of neumerical expression"<<std::endl;
 
-        }else{
-            eat = numerical_operand();
-            //attempt to eat, but not a operand
+            }else{
+                eat = numerical_operand();
+                //attempt to eat, but not a operand
 
-            if(eat == false && tokenVector[state].isIdentifier()){
-                //call expression function to make function call?
-                expression();
+                if(eat = false && tokenVector[state].isIdentifier()){
+                    //call expression function to make function call?
+                    expression();
+                }
+
+
             }
 
+            //then if there is a operator afterward, need to eat that before going to next loop
+            eat = numerical_operator();
 
         }
-
-        //then if there is a operator afterward, need to eat that before going to next loop
-        eat = numerical_operator();
-
-    }
-
-
+              
+    
 }
 
 
@@ -653,10 +743,35 @@ checks if token is a relational_expression
 @post:
  *****************************************************************************************/
 bool Parser::relational_expression(){
-    std::cout<<"in relational_expression"<<std::endl;
-    return tokenVector[state].isBoolE() || tokenVector[state].isBoolNE() ||
-           tokenVector[state].isBoolLT() || tokenVector[state].isBoolGT() ||
-           tokenVector[state].isBoolLTE() || tokenVector[state].isBoolGTE();
+    std::cout<<"in relational_expression/boolean_operator"<<std::endl;
+    if (tokenVector[state].isBoolE()){
+        expect("==");
+        return true;
+    }else if (tokenVector[state].isBoolNE()){
+        expect("!=");
+        return true;
+    }else if (tokenVector[state].isBoolGT()){
+        expect(">");
+        return true;
+    }else if (tokenVector[state].isBoolLT()){
+        expect("<");
+        return true;
+    }else if (tokenVector[state].isBoolGTE()){
+        expect(">=");
+        return true;
+    }else if (tokenVector[state].isBoolLTE()){
+        expect("<=");
+        return true;
+    }else if (tokenVector[state].isBoolOr()){
+        expect("||");
+        return true;
+    }else if (tokenVector[state].isBoolAnd()){
+        expect("&&");
+        return true;
+    }else{
+        std::cout<<"token is not currently a boolean operator"<<std::endl;
+        return false;
+    }
 }
 
 
@@ -665,20 +780,6 @@ bool Parser::relational_expression(){
 
 /** **************************************************************************************
 checks if token is a boolean operator
-@pre:
-@post:
- *****************************************************************************************/
-bool Parser::boolean_operator(){
-    std::cout<<"in boolean_operator"<<std::endl;
-    return (tokenVector[state].isBoolOr() || tokenVector[state].isBoolAnd());
-}
-
-
-
-
-
-/** **************************************************************************************
-checks  if token is a numerical_operator
 @pre:
 @post:
  *****************************************************************************************/
@@ -708,10 +809,6 @@ bool Parser::numerical_operator(){
     }
 }
 
-
-
-
-
 /** **************************************************************************************
 checks if numerical_operand follows BNF
 @pre:
@@ -727,17 +824,17 @@ bool Parser::numerical_operand(){
             expect( tokenVector[state].getTokenString() );
         }
         return true;
-        // if we find a identifier
+    // if we find a identifier
     } else if (tokenVector[state].isInt()){
         expect( tokenVector[state].getTokenString() );
 
         return true;
-        //if we find a char
+    //if we find a char
     }else if (tokenVector[state].getTokenString() == "getchar"){
         getchar_function();
 
         return true;
-        //if we find a single quote
+    //if we find a single quote
     }else if (tokenVector[state].isSingleQuote()){
         expect("'");
         if(tokenVector[state].isChar()){
@@ -750,7 +847,7 @@ bool Parser::numerical_operand(){
         expect("'");
 
         return true;
-        //if we find a double quote
+    //if we find a double quote
     }else if (tokenVector[state].isDoubleQuote()){
         expect("\"");
         if(tokenVector[state].isChar()){
@@ -780,7 +877,7 @@ returns if token is a datatype specifier
  *****************************************************************************************/
 bool Parser::datatype_specifier(){
     return (tokenVector[state].getTokenString() == "int" || tokenVector[state].getTokenString() == "char" ||
-            tokenVector[state].getTokenString() == "bool");
+                                                        tokenVector[state].getTokenString() == "bool");
 }
 
 
@@ -794,14 +891,11 @@ checks if token is followed by identifier list or array lsit
  *****************************************************************************************/
 void Parser::identifier_and_identifier_array_list() {
     std::cout<<"in identifier_and_identifier_array_list"<<std::endl;
-    if(tokenVector[state].isInt()){
-        state -=2;
-    }
     if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isLBracket()) {
         identifier_array_list();
     } else if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isComma()) {
         identifier_list();
-
+        
     } else if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isSemicolon()){
         identifier();
         return;
@@ -868,9 +962,6 @@ void Parser::identifier(){
 }
 
 
-
-
-
 /** **************************************************************************************
 checks if single quoted string
 @pre:
@@ -885,10 +976,6 @@ void Parser::single_quoted_string(){
     expect("\'");
 }
 
-
-
-
-
 /** **************************************************************************************
 checks if double quoted string
 @pre:
@@ -902,11 +989,6 @@ void Parser::double_quoted_string(){
     expect(tokenVector[state].getTokenString());
     expect("\"");
 }
-
-
-
-
-
 
 /** **************************************************************************************
 If the token string matches expected_value then it adds it to the CST tree

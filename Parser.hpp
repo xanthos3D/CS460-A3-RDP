@@ -72,7 +72,7 @@ private:
     bool newStatement = false;
     //vector passed in on declaration
     std::vector<Token> tokenVector;
-    //concrete syntax tree object
+    //concrete syntax tree object 
     CST* cst;
 };
 
