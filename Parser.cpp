@@ -159,6 +159,12 @@ void Parser::parameter_list(){
     //then expect variable name
     identifier();
 
+    //then a array, can be valid syntax for a param list. so if we find a bracket
+    if(tokenVector[state].isLBracket()){
+        //call our function to handle an array [i]
+        identifier_and_identifier_array_list();
+    }
+
     // then we check to see if a comma is present
     if ( tokenVector[state].isComma() ) {
         //if it is then add it
@@ -288,7 +294,7 @@ Checks declaration_statement meets BNF requirements
 @post:
  *****************************************************************************************/
 void Parser::declaration_statement(){
-    //std::cout<<"declaration_statement called"<<std::endl;
+    std::cout<<"in declaration_statement"<<std::endl;
     //if we recieve a specifier(data type)
     if ( datatype_specifier() ){
         //add that token to cst
@@ -304,7 +310,6 @@ void Parser::declaration_statement(){
 
     //if we see a left bracket we are declaring an array
     if ( tokenVector[state].isLBracket()){
-        expect("[");
         identifier_and_identifier_array_list();
     }
 
@@ -314,7 +319,11 @@ void Parser::declaration_statement(){
         identifier_and_identifier_array_list();
     }
     //expect statement to end with a semicolon.
-    expect(";");
+    if(tokenVector[state].isRParen()){
+        return;
+    }else{
+        expect(";");
+    }
 }
 
 
@@ -434,17 +443,24 @@ checks that the follwoing statement is an iteration statement that follows BNF r
  *****************************************************************************************/
 void Parser::iteration_statement() {
 
+    //if identifier is a for loop then
     if ( tokenVector[state].getTokenString() == "for") {
+
+        //set for loop to true, so that we handle semicolons correctly within for statement
+        inForLoop = true;
         expect(tokenVector[state].getTokenString());
         expect("(");
+        std::cout<<"entering initilization statement for for loop"<<std::endl;
         initialization_statement();
         if (tokenVector[state].isSemicolon()) {
             expect(tokenVector[state].getTokenString());
         }
+        std::cout<<"entering boolean statement for for loop"<<std::endl;
         boolean_expression();
         if (tokenVector[state].isSemicolon()) {
             expect(tokenVector[state].getTokenString());
         }
+        std::cout<<"entering increment expression statement for for loop"<<std::endl;
         expression();
         expect(")");
         if (tokenVector[state].isLBrace()) {
@@ -452,6 +468,8 @@ void Parser::iteration_statement() {
         } else {
             statement();
         }
+        //set for loop to false, so we handle semicolons normally after this.
+        inForLoop = false;
     } else if ( tokenVector[state].getTokenString() == "while" ){
         expect(tokenVector[state].getTokenString());
         expect("(");
@@ -524,24 +542,52 @@ checks that the follwoing statement is a initialization expression that follows 
  *****************************************************************************************/
 void Parser::expression(){
     std::cout<<"in expression"<<std::endl;
+    //if we find a token to be true or false boolean then
     if ( tokenVector[state].isBoolTrue() || tokenVector[state].isBoolFalse() ) {
+        //call our boolean expression code
         boolean_expression();
+    //if we find a int 
     } else if (tokenVector[state].isInt()) {
+        //call numeric expression
         numerical_expression();
+    //if we find a identifier and a left paren
     } else if ( tokenVector[state].isIdentifier() && ( ( tokenVector[state+1].isLParen()) )) {
         std::cout<<"in expression, expecting function with paren"<<std::endl;
+        //then we found a function and want to encase the next expression in parenthesis
         expect( tokenVector[state].getTokenString() );
         expect("(");
         expression();
         expect(")");
         return;
+    //if we find a identifier and therei s a demicolon agter it 
     }else if ( tokenVector[state].isIdentifier() && ( ( tokenVector[state+1].isSemicolon() ) )) {
         std::cout<<"in expression, expecting function with paren"<<std::endl;
+        //expect the identifier and then return
         expect( tokenVector[state].getTokenString() );
+        return;
+    //if we find a identifier and a bracket after it. 
+    }else if ( tokenVector[state].isIdentifier() && ( ( tokenVector[state+1].isLBracket()))) {
+        //then we found an array and expect it to close properly
+        std::cout<<"in expression, expecting function with bracket so array"<<std::endl;
+        //eat the identifier
+        expect( tokenVector[state].getTokenString() );
+
+        //then handle array with out declaration statement code.
+        declaration_statement();
         return;
     }else if (tokenVector[state].isIdentifier()) {
         std::cout<<"in expression, expecting variable"<<std::endl;
-        if ( relational_expression() || relational_expression() ) {
+
+        //if we see a assignment operator after a identifier
+        if(tokenVector[state+1].isAssignmentOperator()){
+            //eat identifier and then assignment operator
+            expect(tokenVector[state].getTokenString());
+            expect("=");
+
+            //then call our numerical expression function
+            numerical_expression();
+           
+        }else if ( relational_expression() || relational_expression() ) {
             boolean_expression();
         }
         numerical_expression();
@@ -610,19 +656,23 @@ void Parser::boolean_expression(){
         }
 
         //if we find a identifier
+    }else if(tokenVector[state].isBoolNot()){
+
+        //eat !
+        expect("!");
+
+        //recursively call our boolean expression
+        boolean_expression();
+
+        //if we find a open paren
     }else if(tokenVector[state].isIdentifier()){
 
         //could be a variable so eat up input
         expect(tokenVector[state].getTokenString());
 
-        //could be a function call
-        if(tokenVector[state].isLParen()){
-
-        }
-
-        //could be an array refrence
-        if(tokenVector[state].isLBracket()){
-
+        //could be an array refrence or a function call
+        if(tokenVector[state].isLBracket()||tokenVector[state].isLParen()){
+             identifier_and_identifier_array_list();
         }
 
         //after we figure out what we are working with then check if next symbol is a bool operator
@@ -634,15 +684,6 @@ void Parser::boolean_expression(){
             //then call numericla expression after we eat the numerical operator.
             numerical_expression();
         }
-
-        //if we find a open paren
-    }else if(tokenVector[state].isBoolNot()){
-
-        //eat !
-        expect("!");
-
-        //recursively call our boolean expression
-        boolean_expression();
 
         //if we find a open paren
     }else if(tokenVector[state].isDoubleQuote()){
@@ -667,6 +708,14 @@ void Parser::boolean_expression(){
         //eat paren
         expect("(");
 
+        if(tokenVector[state].isBoolNot()){
+        expect("!");
+
+        //recursively call our boolean expression
+        boolean_expression();
+        //if we find a open paren
+        }
+
         // if we find a identifier
         if (tokenVector[state].isIdentifier()) {
             //could just recieve a identifier by its self so recursive call so its caught by our
@@ -674,7 +723,6 @@ void Parser::boolean_expression(){
             boolean_expression();
 
         }
-        std::cout<<"here!"<<std::endl;
         expect(")");
 
         if(relational_expression()){
@@ -684,8 +732,15 @@ void Parser::boolean_expression(){
         }
 
 
+    }else if (tokenVector[state].isSingleQuote() ){
+        //eat paren
+        single_quoted_string();
+
+        boolean_expression();
+
     }else{
 
+        std::cout<<"in else case!"<<std::endl;
         numerical_expression();
         if (  relational_expression() ){
             expect( tokenVector[state].getTokenString() );
@@ -740,6 +795,10 @@ void Parser::numerical_expression() {
 
         //then if there is a operator afterward, need to eat that before going to next loop
         eat = numerical_operator();
+
+        if(relational_expression()){
+            boolean_expression();
+        }
 
     }
 
@@ -849,6 +908,8 @@ bool Parser::numerical_operand(){
         expect("'");
         if(tokenVector[state].isChar()){
             expect( tokenVector[state].getTokenString() );
+        }else if (tokenVector[state].isString()){
+            expect( tokenVector[state].getTokenString());
         }else if (tokenVector[state].isEscChar()){
             expect( tokenVector[state].getTokenString() );
         }else{
@@ -904,17 +965,36 @@ void Parser::identifier_and_identifier_array_list() {
     if (tokenVector[state].isInt()){
         state -= 2;
     }
-    if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isLBracket()) {
-        identifier_array_list();
-    } else if (tokenVector[state].isIdentifier() && tokenVector[state + 1].isComma()) {
-        identifier_list();
 
+    //special case, if we end up finding a identifier here then
+    if(tokenVector[state].isIdentifier()){
+        expect(tokenVector[state].getTokenString());
+    }
+
+    //after that identifier is there was one, or if we dont hav to worry about one
+    //do we have a bracket, if so then we have a array, go to that function logic
+    if ( tokenVector[state].isLBracket()) {
+        identifier_array_list();
+
+    //otherwise if its a open paren then we have a function call
+    }else if (tokenVector[state].isLParen()) {
+        expect("(");
+        identifier_list();
+        expect(")");
+
+    //if we see a comma by its self then call identifier list. mostelikely called after identifier list was finished with a function call or array[a]
+    }else if (tokenVector[state].isComma()) {
+        expect(",");
+
+        identifier_list();
     } else if (tokenVector[state].isIdentifier() /*&& tokenVector[state + 1].isSemicolon()*/){
         identifier();
-        return;
-    }else {
-        throw std::runtime_error("Expected an identifier, but got '" + tokenVector[state].getTokenString() + "'");
+
+    }else{
+        //throw std::runtime_error("Expected an identifier, but got '" + tokenVector[state].getTokenString() + "'");
     }
+
+    std::cout<<"end identifier_and_identifier_array_list"<<std::endl;
 }
 
 
@@ -927,14 +1007,37 @@ checks identifier  list follows BNF rules
 @post:
  *****************************************************************************************/
 void Parser::identifier_list() {
+    std::cout<<"in identifier list"<<std::endl;
 
+    //if we find, a identifier, or a data type
+    if(tokenVector[state].isIdentifier()){
+        //eat that value
+        expect(tokenVector[state].getTokenString());
+
+        //then if we find a comma after that we recurse on this function
+        if(tokenVector[state].isComma()){
+            std::cout<<"recursively calling identifier list"<<std::endl;
+            //eat the comma
+            expect(",");
+            //recurse to get the next identifier in our list
+            identifier_list();
+        //found a function call or a array in identifier list we call our identifier_and_identifier_array_list() function
+        }else if(tokenVector[state].isLParen() || tokenVector[state].isLBracket()){
+            identifier_and_identifier_array_list();
+        }
+    }else{
+        //throw error, potentially called after we found a comma but no proper identifier or data type was found.
+    }
+
+    /*//if we have a identifier, and a comma is after it then
     if ( tokenVector[state].isIdentifier() && tokenVector[state + 1].isComma() ) {
+
         expect(tokenVector[state].getTokenString());
         expect(",");
         identifier_list();
     }else if( tokenVector[state].isIdentifier()){
         expect(tokenVector[state].getTokenString());
-    }
+    }*/
 }
 
 
@@ -947,15 +1050,27 @@ checks identifier array list follows BNF rules
 @post:
  *****************************************************************************************/
 void Parser::identifier_array_list() {
-    expect( tokenVector[state].getTokenString() );
+    std::cout<<" in identifier_array_list"<<std::endl;
+    //std::cout<<"token is: "<<tokenVector[state].getTokenString()<<std::endl;
+
+    // ok so we found a array call, we expect to be at the open lbracket
     expect( "[" );
+
+    //then we expect either a int which we eat
     if (tokenVector[state].isInt()) {
         expect(tokenVector[state].getTokenString());
+    //or a identifier that we eat
+    }else if(tokenVector[state].isIdentifier()){
+        expect(tokenVector[state].getTokenString());
     }
+    //then we expect a closing bracket
     expect( "]" );
+
+    //recursively call our array if there is a extra demention to our array.
     if ( tokenVector[state].isComma() ) {
         identifier_array_list();
     }
+    std::cout<<" ending identifier_array_list"<<std::endl;
 }
 
 
@@ -981,6 +1096,7 @@ checks if single quoted string
 @post:
  *****************************************************************************************/
 void Parser::single_quoted_string(){
+    std::cout<<"in single quote"<<std::endl;
     if (!tokenVector[state].isSingleQuote()){
         throw std::runtime_error("Expected a single quote, but got '" + tokenVector[state].getTokenString() + "'");
     }
@@ -1018,14 +1134,23 @@ void Parser::expect(const std::string& expected_value) {
             throw std::runtime_error("Expected '" + expected_value + "' but got: '" + tokenVector[state].getTokenString()  + "'");
         }
 
+        //if state is zero, then make new root
         if (state == 0){
             cst->setRoot(new CSTNode(tokenVector[state]));
-        }else if (token.isLBrace() ){
+        //if we find a left or right brace then make a right child of that token
+        }else if (token.isLBrace()|| token.isRBrace() ){
             newStatement = true;
             cst->addChild( cst->getRoot(), token );
-        }else if ( token.isSemicolon() ){
+        //sibling for semicolon, but only if we arnt in a for loop
+        }else if ( token.isSemicolon() && inForLoop == false){
             newStatement = true;
             cst->addSibling( cst->getRoot(), token );
+
+        //sibling if we are in a for loop then we havent entered a new statement.
+        }else if ( token.isSemicolon() && inForLoop == true){
+            newStatement = false;
+            cst->addSibling( cst->getRoot(), token );
+
         }else if (newStatement){
             cst->addChild( cst->getRoot(), token );
             newStatement = false;

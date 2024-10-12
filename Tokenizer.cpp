@@ -69,6 +69,8 @@ bool Tokenizer::charOfInterest(char c) {
             return true;
         }else if(c == '|'){
             return true;
+        }else if(c == '!'){
+            return true;
         }
     }else if(state == 1){
 
@@ -151,31 +153,24 @@ Token Tokenizer::getToken() {
 
         }else if(c == '('){
             token.setLParen();
-            token.setTokenString( "(");
             return token;
         }else if(c == ')'){
             token.setRParen();
-            token.setTokenString( ")");
             return token;
         }else if(c == '{'){
             token.setLBrace();
-            token.setTokenString( "{");
             return token;
         }else if(c == '}'){
             token.setRBrace();
-            token.setTokenString( "}");
             return token;
         }else if(c == '['){
             token.setLBracket();
-            token.setTokenString( "[");
             return token;
         }else if(c == ']'){
             token.setRBracket();
-            token.setTokenString( "]");
             return token;
         }else if(c == ';'){
             token.setSemicolon();
-            token.setTokenString( ";");
             return token;
         }else if(c == '='){
             //need a special case where if there is a equal after this then
@@ -200,31 +195,25 @@ Token Tokenizer::getToken() {
                 token.setInt(tempText);
             }else{
                 token.setMinus();
-                token.setTokenString("-");
             }
             inputStream.putback(c);
             return token;
         }else if(c == '\"'){
             token.setDoubleQuote();
-            token.setTokenString("\"");
             state = 1;
             return token;
         }else if(c == '\''){
             token.setSingleQuote();
-            token.setTokenString("\'");
             state = 3;
             return token;
         }else if(c == ','){
             token.setComma();
-            token.setTokenString( ",");
             return token;
         }else if(c == '%'){
             token.setModulo();
-            token.setTokenString("%");
             return token;
         }else if(c == '*'){
             token.setAsterisk();
-            token.setTokenString("*");
             return token;
         }else if(c == '+'){
             tempText = '+';
@@ -244,7 +233,6 @@ Token Tokenizer::getToken() {
                 }
             }else{
                 token.setPlus();
-                token.setTokenString("+");
             }
             inputStream.putback(c);
             return token;
@@ -256,11 +244,9 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolGTE();
-                token.setTokenString(">=");
 
             }else{
                 token.setBoolGT();
-                token.setTokenString(">");
             }
 
             return token;
@@ -269,10 +255,8 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolLTE();
-                token.setTokenString("<=");
             }else{
                 token.setBoolLT();
-                token.setTokenString("<");
             }
             return token;
         }else if(c == '&'){
@@ -280,7 +264,6 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolAnd();
-                token.setTokenString("&&");
             }else{
                 std::cout<< "malformed && on line: "<<lineNumber<<" position: "<<charPosition<<std::endl;
                 exit(1);
@@ -292,7 +275,6 @@ Token Tokenizer::getToken() {
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolOr();
-                token.setTokenString("||");
             }else{
                 std::cout<< "malformed || on line: "<<lineNumber<<" position: "<<charPosition<<std::endl;
                 exit(1);
@@ -301,19 +283,16 @@ Token Tokenizer::getToken() {
             return token;
         }else if(c == '/'){
             token.setDivide();
-            token.setTokenString("/");
             return token;
             // additional case for ! and !=
         }else if(c == '!'){
-            std::cout<<"found > "<<std::endl;
+            std::cout<<"found ! "<<std::endl;
             if(inputStream.peek() == '='){
                 //eat up next input
                 inputStream.get(c);
                 token.setBoolNE();
-                token.setTokenString("!=");
             }else{
                 token.setBoolNot();
-                token.setTokenString("!");
             }
 
             return token;
@@ -350,7 +329,6 @@ Token Tokenizer::getToken() {
     }else if(state == 2){
         inputStream.get(c);
         token.setDoubleQuote();
-        token.setTokenString("\"");
         state = 0;
         return token;
 

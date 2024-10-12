@@ -70,6 +70,7 @@ private:
     //possition in our vector which is passed in, and current state
     int state = 0;
     bool newStatement = false;
+    bool inForLoop = false;
     //vector passed in on declaration
     std::vector<Token> tokenVector;
     //concrete syntax tree object 
