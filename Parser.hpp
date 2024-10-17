@@ -55,6 +55,7 @@ public:
     bool numerical_operator();
     bool numerical_operand();
     bool datatype_specifier();
+    bool reserved_word();
     void identifier_and_identifier_array_list();
     void identifier_array_list();
     void identifier_list();
@@ -73,7 +74,7 @@ private:
     bool inForLoop = false;
     //vector passed in on declaration
     std::vector<Token> tokenVector;
-    //concrete syntax tree object 
+    //concrete syntax tree object
     CST* cst;
 };
 

@@ -9,18 +9,18 @@
 //default constructor, want to give it line data and set up some default vairables apart of the object.
 Token::Token(int line, int pos)
         : _lineNumber(line), _charPos(pos),
-          //Misc
+        //Misc
           _identifier(false), _doubleQuote(false), _singleQuote(false),
           _semicolon(false), _comma(false), _eof(false),
-          //Brackets & Parenthesis
+        //Brackets & Parenthesis
           _LParen(false), _RParen(false), _LBrace(false), _RBrace(false),
           _LBracket(false), _RBracket(false),
-          //Operators
+        //Operators
           _assignmentOperator(false), _modulo(false),
           _plus(false), _minus(false), _asterisk(false), _divide(false), _caret(false),
-          //Data Types
+        //Data Types
           _int(false), _double(false), _char(false), _string(false), _escChar(false),
-          //Boolean Ops
+        //Boolean Ops
           _boolE(false),_boolNot(false), _boolNE(false), _boolGT(false), _boolLT(false),
           _boolGTE(false), _boolLTE(false), _boolAnd(false), _boolOr(false),
           _boolTrue(false), _boolFalse(false),
@@ -72,10 +72,10 @@ bool& Token::isBoolFalse(){return _boolFalse;}
 
 
 //create setter functions
-void Token::setIdentifier(std::string input) { 
+void Token::setIdentifier(std::string input) {
     _identifier = true;
     _tokenString = input;
- }
+}
 void Token::setDoubleQuote(){ _doubleQuote = true; setTokenString("\""); }
 void Token::setSingleQuote(){ _singleQuote = true; setTokenString("'"); }
 void Token::setSemicolon(){ _semicolon = true; setTokenString(";");}
@@ -97,17 +97,17 @@ void Token::setAsterisk(){ _asterisk = true; setTokenString("*");}
 void Token::setDivide(){ _divide = true; setTokenString("/");}
 void Token::setCarot(){ _caret = true;setTokenString("^"); }
 
-void Token::setInt(std::string input) { 
+void Token::setInt(std::string input) {
     _int = true;
     _tokenString = input;
 }
 void Token::setDouble(std::string input){
-     _double = true; 
-     _tokenString = input;
+    _double = true;
+    _tokenString = input;
 }
 void Token::setChar(std::string input){
-     _char = true;
-     _tokenString = input;
+    _char = true;
+    _tokenString = input;
 }
 
 void Token::setEscChar(std::string input){
@@ -117,8 +117,8 @@ void Token::setEscChar(std::string input){
 }
 
 void Token::setString(std::string input){
-     _string = true;
-     _tokenString = input;
+    _string = true;
+    _tokenString = input;
 }
 
 void Token::setBoolE(){ _boolE= true; setTokenString("==");}
@@ -425,10 +425,10 @@ std::string Token::print() {
             std::cout<< "BOOLEAN_FALSE" <<std::endl;
             std::cout<<"Token:      "<<"False"<<std::endl;
         }else{
-        std::cout << "Token::print -- unknown token.\n" << std::endl;
-        exit(3);
+            std::cout << "Token::print -- unknown token.\n" << std::endl;
+            exit(3);
         }
-       output+= "\n";
+        output+= "\n";
     }
     return output;
 

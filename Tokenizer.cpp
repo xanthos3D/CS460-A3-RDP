@@ -328,6 +328,11 @@ Token Tokenizer::getToken() {
         return token;
     }else if(state == 2){
         inputStream.get(c);
+        if(c == '\000' || c == '\0'){
+            std::cout<<"End of string"<<std::endl;
+            token.setEndOfFile();
+            return token;
+        }
         token.setDoubleQuote();
         state = 0;
         return token;
