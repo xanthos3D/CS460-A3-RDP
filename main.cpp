@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
 
     //function to remove comments
     string output = commentParser(inputStream,argv[1]);
+    std::cout<<"Removing comments -------------------------------------------------------"<<std::endl;
 
     string tokenizeFile = filename + " without comments.c";
     ofstream result("./" + tokenizeFile, ios::out);
@@ -89,15 +90,17 @@ int main(int argc, char *argv[]) {
     //function to get tokens out of comment free file
     std::vector<Token> tokenVector = buildTokenVector(tokenizer);
 
+    std::cout<<"Tokenized Program ------------------------------------------------------"<<std::endl;
+
     //make the parse object, passing it in our token vector.
     Parser CSTparser(tokenVector);
 
     //call our parse function built into our parser to make the CST
     CST* tree = CSTparser.parse();
     //tree->printTree();
-    std::cout<<"printing out CST Tree ++++++++++++++++++++++++++++++++++++++++++++++"<<std::endl;
 
     CSTparser.printTree();
+    std::cout<<"Sucessfully Created CST ------------------------------------------------------"<<std::endl;
     return 0;
 }
 
@@ -107,12 +110,12 @@ function to build our token vector for the recursive decent parsing
 @post: returns a vector of tokens
  *****************************************************************************************/
 std::vector<Token> buildTokenVector(Tokenizer& sourceFile){
-    cout<<"making token vector. ++++++++++++++++++++++++++++++++++++ <<"<<endl;
+    //cout<<"making token vector. ++++++++++++++++++++++++++++++++++++ <<"<<endl;
     //make a vector to stre tokens
     std::vector<Token> tokenVector;
     //gets the first token
     Token token = sourceFile.getToken();
-    token.print();
+    //token.print();
     //add first token to vector
     tokenVector.push_back(token);
     //loop through until we reach a eof token
@@ -121,7 +124,7 @@ std::vector<Token> buildTokenVector(Tokenizer& sourceFile){
         token.print();
         tokenVector.push_back(token);
     }
-    cout<<"token vector complete. ++++++++++++++++++++++++++++++++++++ <<"<<endl;
+    //cout<<"token vector complete. ++++++++++++++++++++++++++++++++++++ <<"<<endl;
     return tokenVector;
 }
 
